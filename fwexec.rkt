@@ -2,9 +2,9 @@
 ;;; The example implementation of a framework which takes the interaction description from
 ;;; the "warnfw" module and polls the sources, etc.
 
-(require "diaspec.rkt")
-(require "useful.rkt")
-(require "structs.rkt")
+(require diaracket/diaspec)
+(require diaracket/useful)
+(require diaracket/structs)
 (require (prefix-in c: racket/control))
 (provide runfw)
 

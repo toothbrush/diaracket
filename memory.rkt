@@ -1,6 +1,6 @@
 #lang racket
 
-(require (for-syntax "storage.rkt"))
+(require (for-syntax diaracket/storage))
 
 (provide (all-defined-out))
 

@@ -1,4 +1,4 @@
-#lang s-exp "thermo-spec.rkt"
+#lang s-exp diaracket/thermo-spec
 
 ;; here we will provide the implementations of the
 ;; various components.

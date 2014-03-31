@@ -1,4 +1,4 @@
-#lang s-exp "diaspec.rkt"
+#lang s-exp diaracket/diaspec
 
 ; these sources and actions should be defined elsewhere, in a central taxonomy.
 (taxonomy "taxo.rkt")

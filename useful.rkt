@@ -1,7 +1,7 @@
 #lang racket
 
 (provide (all-defined-out))
-(require "memory.rkt")
+(require diaracket/memory)
 
 
 ;; helper functions
