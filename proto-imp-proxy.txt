@@ -1,0 +1,25 @@
+#lang s-exp "proto-spec"
+
+;; this version will use the proxied inputs, that is, data
+;; requirements of the code snippets are passed in as
+;; closures which will have run-time guards agains misuse.
+
+(implement maxTemp
+           (lambda () ;no inputs
+            50)) ; in our example the maximum temperature is 50 degrees
+
+(implement warn
+           (lambda (temperature ; published, so this is a plain integer
+                    maxTemp)    ; this will be a closure which returns
+                                ; the maxTemp on evaluation
+                   (>
+                      temperature
+                      (maxTemp)) ; no discovery, since contexts are unique
+                      ))
+
+(implement controlFan
+           (lambda (warning    ; the boolean-typed input
+                    fanspeed)  ; a guarded method to control the fan
+                   (if warning (fanspeed 5)
+                               (fanspeed 0)))) ;if there's a warning, turn
+                                               ; the fan to speed 5, otherwise off

@@ -1,0 +1,18 @@
+#lang s-exp "diaspec"
+
+; a context called maxTemp which provides a fixed maximum temperature, the
+; get_nothing tag means it has no data requirement.
+(define-context maxTemp Integer (when-required get_nothing))
+
+; a context which compares published temperatures with the max. We
+; assume that in the taxonomy there is a thermometer defined using
+; (define-source temperature Integer), meaning its output is the
+; temperature as an integer.
+(define-context warn Boolean (when-published temperature maxTemp
+                always_publish))
+
+; a controller which gets notified of warning-values, and which
+; has access to an action fanspeed. We assume it is defined in the taxonomy
+; using (define-action fanspeed Integer), in other words it takes a
+; single parameter for controlling its speed.
+(define-controller controlFan Boolean (when-published warn fanspeed))
