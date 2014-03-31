@@ -1,6 +1,9 @@
 ;; in this file we will give the implementations of the 
 ;; taxonomy-defined resources.
 
+;; note that it isn't independently loadable -- it is syntactically 
+;; spliced into the thermo-impl.rkt file (because of the taxonomy-keyword)
+
 (implement Fan
            (lambda (spd)
              (match spd
