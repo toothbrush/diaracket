@@ -6,6 +6,7 @@
 ; import the available resources:
 (taxonomy "taxo-impl.rkt")
 
+;TODO oops, cannot do (implement ...) in REPL??
 (implement FanSpeed
            (lambda (warnCtxResult fancontrolspeed)
              (when warnCtxResult 

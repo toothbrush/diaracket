@@ -13,7 +13,7 @@
          (rename-out [specification-module-begin #%module-begin]))
 
 (define-syntax (process-spec-body stx)
-  (syntax-case stx () ;(define-action define-source define-context define-controller)
+  (syntax-case stx ()
     [(_ 
       (define-keyword nm args ...) ...)
      (with-syntax ([run (make-id "run" stx)]
@@ -85,7 +85,7 @@
 
 ;; this macro splices in the taxonomy specification files.
 (define-syntax (specification-module-begin stx)
-  (syntax-case stx (taxonomy) ; define-action define-source define-context define-controller)
+  (syntax-case stx (taxonomy)
     [(_ 
       (taxonomy f)
       (define-keyword nm args ...) ...)
@@ -183,8 +183,7 @@
      (with-syntax 
          ([structnm    (make-id "~a-structure" stx #'name)]
           [giveimp     (make-id "implement-~a" stx #'name)]
-          [contract-id (make-id "~a-contract"  stx #'name)]
-          )
+          [contract-id (make-id "~a-contract"  stx #'name)])
        #`(begin
            (define-struct/contract structnm
              ([spec   any/c]
@@ -197,30 +196,20 @@
                 (with-syntax 
                     ([modname   (make-id "~a-submodule" fstx #'name)]
                      [theimp    (make-id "~a-implementation" fstx #'name)]
-                     [require-spec 
-                      (datum->syntax 
-                       fstx
-                       `(submod
-                         "."
-                         ,(make-id "~a-submodule" fstx #'name)) ; argh duplication. with-syntax isn't recursive
-                       )]
                      [rs2 (datum->syntax
                            fstx
                            `(submod #,(mymodname) contracts))])
-                  #'(begin
+                  #`(begin
                       (module modname racket
                         (require diaracket/useful)
                         (require diaracket/structs (for-syntax diaracket/structs))
                         (require rs2)
                         (provide theimp)
-                        (define/contract theimp contract-id f)
-                        )
-                      (require require-spec)
+                        (define/contract theimp contract-id f))
+                      (require #,(datum->syntax fstx `(submod "." ,#'modname)))
                       (setimpl 'name (structnm name theimp))
                       (display-line "Implementation " 'name " stored.")
-                      )
-                  )
-                ]))
+                      ))]))
            (display-line "[" (~a #:min-width 10 (string-upcase (symbol->string 'type)))
                          "] => " "implement " 'name " :: "  (contract-name  (giveContract name)))
            (addDeviceToList name)))]))
