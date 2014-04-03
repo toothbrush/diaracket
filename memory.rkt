@@ -2,11 +2,11 @@
 
 (provide (all-defined-out))
 
-;; these lists will be used for compile-time recording
+;; these will be used for compile-time recording
 ;; of the declared identifiers. then, an implementation file
 ;; can be analysed for validity, at transform time.
 (begin-for-syntax 
-  ; empty storage
+  ; empty storage as a starting point
   (define storage      '())
   (define storage-taxo '())
   

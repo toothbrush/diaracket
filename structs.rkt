@@ -1,7 +1,6 @@
 #lang racket
 
-(require diaracket/useful)
-(require (for-syntax diaracket/useful))
+(require diaracket/useful (for-syntax diaracket/useful))
 (require (for-syntax racket/contract))
 (provide (all-defined-out))
 
@@ -15,7 +14,7 @@
    [type type?]
    ) #:transparent)
 
-;; is the context's interaction contract reasonable? we also
+;; here we check that the context's interaction contract is reasonable. e.g.
 ;; check that if a context A has a datarequirement which is another
 ;; context B, that B is when-required.
 
@@ -47,9 +46,8 @@
     (and
      (interactioncontract? ic)
      (context? (interactioncontract-activation ic))
-     (eq? 'none (interactioncontract-datareq ic)) ;; we don't allow data requirements for controllers.
-     (action? (interactioncontract-publishoract ic))
-     )))
+     (eq? 'none (interactioncontract-datareq ic)) ;; we don't allow data reqs for controllers.
+     (action? (interactioncontract-publishoract ic)))))
 
 (define-struct/contract context
   ([name any/c]
@@ -72,8 +70,7 @@
 (define/contract
   (giveContractAct type)
   (-> type? contract?)
-  (-> (interp type) void?)
-  )
+  (-> (interp type) void?))
 
 (define-syntax-rule (giveContractDev type)
   (-> (interp type)))
@@ -107,9 +104,12 @@
           [output-term (case activ
                          ['when-required (list out)]
                          [else           (list none/c)])] 
-          ; TODO think about the impossible-contract being applicable, if a continuation should be used.
-          ; realise that this doesn't change much: the blame is laid, but potential "damage" can already be
-          ; done in the context. only useful thing is that if publish is never used, there's a complaint, 
+          ; TODO think about the impossible-contract being applicable, if a continuation 
+          ; should be used.
+          ; realise that this doesn't change much: the blame is laid, but potential
+          ; "damage" can already be
+          ; done in the context. only useful thing is that if publish is never used, 
+          ; there's a complaint, even 
           ; if only at runtime.
           )
     (eval #`#,(append (list #'->) 
