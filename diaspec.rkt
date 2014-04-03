@@ -27,7 +27,8 @@
            ;; copy the architect's declarations
            (define-something define-keyword nm args ...) ...
            
-           (sysdescription) ; pre-empt the contract which checks the description's validity
+           ; pre-empt the contract which checks the description's validity
+           (let ([dummy (sysdescription)]) (display-line "System seems reasonable."))
            
            (require diaracket/structs)
            (require diaracket/useful)
