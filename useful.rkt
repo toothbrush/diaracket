@@ -3,7 +3,6 @@
 (provide (all-defined-out))
 (require diaracket/memory)
 
-
 ;; helper functions
 (define (display-line . args)
   (for-each display args)
@@ -23,7 +22,6 @@
     [else (error "nonsense type! " ty)]
     )
   )
-
 
 (define make-id
   (case-lambda
@@ -59,6 +57,6 @@
 
 ;; gets the implementation term
 (define (lookupImplementation needle)
-  (let ([str (hash-ref ht needle)])
+  (let ([str (hash-ref implementationsHash needle)])
     (vector-ref (struct->vector str) 2)
     ))
