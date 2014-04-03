@@ -9,34 +9,25 @@
 (provide (all-defined-out)
          (all-from-out diaracket/useful)
          (all-from-out diaracket/memory)
-         (except-out (all-from-out racket) #%module-begin)
-         (rename-out [specification-module-begin         #%module-begin]))
+         (except-out (all-from-out racket)       #%module-begin)
+         (rename-out [specification-module-begin #%module-begin]))
 
-;todo solve issue where we must group declarations.
 (define-syntax (process-spec-body stx)
-  (syntax-case stx (define-action define-source define-context define-controller)
+  (syntax-case stx () ;(define-action define-source define-context define-controller)
     [(_ 
-      ((define-action     nma tya) ...)
-      ((define-source     nmb tyb) ...)
-      ((define-context    nmc tyc ctra) ...)
-      ((define-controller nmd     ctrb) ...)
-      )
+      (define-keyword nm args ...) ...)
      (with-syntax ([run (make-id "run" stx)]
                    [implementation-module-begin (make-id "module-begin-inner" stx)])
        #`(begin
            (clearList) ;; reset the defined-components list.
            
            ;; intro the definitions
-           (intro-spec action     nma tya) ...
-           (intro-spec source     nmb tyb) ...
-           (intro-spec context    nmc tyc ctra) ...
-           (intro-spec controller nmd     ctrb) ...
+           (intro-spec define-keyword nm args ...) ...
            
            ;; copy the architect's declarations
-           (define-something action     nma tya) ...
-           (define-something source     nmb tyb) ...
-           (define-something context    nmc tyc ctra) ...
-           (define-something controller nmd     ctrb) ...
+           (define-something define-keyword nm args ...) ...
+           
+           (sysdescription) ; pre-empt the contract which checks the description's validity
            
            (require diaracket/structs)
            (require diaracket/useful)
@@ -45,15 +36,11 @@
            (require racket)
            
            (begin-for-syntax
-             (remember nma taxo) ...
-             (remember nmb taxo) ...
-             (remember nmc rest) ...
-             (remember nmd rest) ...
-             )
+             (remember nm taxo) ...)
            
            (define-syntax (implement sstx)
              (syntax-case sstx []
-               [(_ name args (... ...))
+               [(_ name as (... ...))
                 (with-syntax 
                     ([ins (make-id "implement-~a" sstx  #'name)])
                   (unless (ormap (lambda (x) (equal? x (syntax->datum #'name))) 
@@ -61,7 +48,7 @@
                     (raise-syntax-error 
                      (syntax->datum #'name) " is not defined in " #,(mymodname))
                     )
-                  #'(begin (ins args (... ...)))
+                  #'(begin (ins as (... ...)))
                   )]))
            
            (provide (all-defined-out)
@@ -81,8 +68,7 @@
            (define-syntax (implementation-module-begin stx2)
              (syntax-case stx2 (implement taxonomy)
                [(_ (taxonomy f)
-                   (implement decls (... ...)) (... ...)
-                   )
+                   (implement decls (... ...)) (... ...))
                 (with-syntax ([(taxo (... ...)) (datum->syntax stx2 (port->syntax
                                                                      (open-input-file 
                                                                       (syntax->datum #'f)) (list)))])
@@ -98,12 +84,10 @@
 
 ;; this macro splices in the taxonomy specification files.
 (define-syntax (specification-module-begin stx)
-  (syntax-case stx (taxonomy define-action define-source define-context define-controller)
+  (syntax-case stx (taxonomy) ; define-action define-source define-context define-controller)
     [(_ 
       (taxonomy f)
-      ((define-context    nmc tyc ctra) ...)
-      ((define-controller nmd     ctrb) ...)
-      )
+      (define-keyword nm args ...) ...)
      (with-syntax ([run (make-id "run" stx)]
                    [module-begin-inner (make-id "module-begin-inner" stx)]
                    [(taxo ...) (datum->syntax stx (port->syntax
@@ -112,8 +96,7 @@
        #`(#%module-begin
           (process-spec-body 
            taxo ...
-           ((define-context    nmc tyc ctra) ...)
-           ((define-controller nmd     ctrb) ...)
+           (define-keyword nm args ...) ...
            )))]))
 
 ;; this procedure makes sure that all elements of required appear
@@ -129,8 +112,6 @@
   (map (lambda (req) (unless (ormap (lambda (candidate) (equal? candidate req)) provided-names)
                        (raise-syntax-error req ": component not implemented! use (implement ... )"))
          ) required))
-
-
 
 ;; bind the definitions, and add their contracts to a submodule
 ;; so that the implementation-submodules can still access them.
@@ -154,31 +135,32 @@
 ; declarations into the corresponding structs, then uses 
 ; contracts-module+ to bind them to predictable names. 
 (define-syntax (intro-spec stx)
-  (syntax-case stx (context controller source action do 
-                            when-required when-provided get)
-    [(_ context name ty [when-required get dr])
+  (syntax-case stx (define-context define-controller define-source define-action do 
+                     when-required when-provided get)
+    [(_ define-context name ty [when-required get dr])
      #`(begin
          (contracts-module+ name (context 'name 
                                           (interactioncontract 
                                            'when-required (quoteDr dr) 'neverPublish) (quoteTy ty))))]
-    [(_ context name ty [when-provided nm get dr pub])
+    [(_ define-context name ty [when-provided nm get dr pub])
      #`(begin
          (contracts-module+ name (context 'name 
                                           (interactioncontract 
                                            nm             (quoteDr dr) (quotePub pub)) (quoteTy ty))))]
-    [(_ source name ty)
+    [(_ define-source name ty)
      #`(begin
          (contracts-module+ name (source 'name (quoteTy ty))))]
-    [(_ action name ty)
+    [(_ define-action name ty)
      #`(begin 
          (contracts-module+ name (action 'name (quoteTy ty))))]
-    [(_ controller name [when-provided nm do act])
+    [(_ define-controller name [when-provided nm do act])
      #`(begin
          (contracts-module+ name (controller 'name 
                                              (interactioncontract 
                                               nm           'none           act))))]))
 
 ; brr ugly, find module name.
+; used to give nicer error messages, and to include submodules
 (define-for-syntax (mymodname) 
   (last
    (regexp-split #rx"/"
@@ -200,7 +182,7 @@
      (with-syntax 
          ([structnm    (make-id "~a-structure" stx #'name)]
           [giveimp     (make-id "implement-~a" stx #'name)]
-          [contract-id (make-id "~a-contract" stx #'name)]
+          [contract-id (make-id "~a-contract"  stx #'name)]
           )
        #`(begin
            (define-struct/contract structnm
