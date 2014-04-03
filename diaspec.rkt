@@ -22,7 +22,7 @@
            (clearList) ;; reset the defined-components list.
            
            ;; intro the definitions
-           (intro-spec define-keyword nm args ...) ...
+           (append-contracts-module define-keyword nm args ...) ...
            
            ;; copy the architect's declarations
            (define-something define-keyword nm args ...) ...
@@ -62,8 +62,9 @@
                     (except-out (all-from-out racket) #%module-begin)
                     (rename-out [implementation-module-begin   #%module-begin]))
            
+           ; delay evaluation of lookupImplementation till later.
            (define (run)
-             (runfw (lambda (x) (lookupImplementation x)) ; delay evaluation of sysdescription till later.
+             (runfw (lambda (x) (lookupImplementation x))
                     (sysdescription)))
            
            (define-syntax (implementation-module-begin stx2)
@@ -106,16 +107,16 @@
   (define provided-names '())
   (map
    (lambda (st)
-     (syntax-case st (implement)
-       [(_ a shiz ...) (set! provided-names (cons (syntax->datum #'a) provided-names))]
-       ))
-   (syntax-e provided))
+     (syntax-case st ()
+       [(_ a _) (set! provided-names (cons (syntax->datum #'a) provided-names))]
+       )) (syntax-e provided))
   (map (lambda (req) (unless (ormap (lambda (candidate) (equal? candidate req)) provided-names)
                        (raise-syntax-error req ": component not implemented! use (implement ... )"))
          ) required))
 
 ;; bind the definitions, and add their contracts to a submodule
 ;; so that the implementation-submodules can still access them.
+;; module+ adds to module called $id$ if it already exists.
 (define-syntax (contracts-module+ stx)
   (syntax-case stx []
     [(_ name obj)
@@ -135,19 +136,21 @@
 ; this function basically translates the architect-provided
 ; declarations into the corresponding structs, then uses 
 ; contracts-module+ to bind them to predictable names. 
-(define-syntax (intro-spec stx)
+(define-syntax (append-contracts-module stx)
   (syntax-case stx (define-context define-controller define-source define-action do 
                      when-required when-provided get)
     [(_ define-context name ty [when-required get dr])
      #`(begin
-         (contracts-module+ name (context 'name 
-                                          (interactioncontract 
-                                           'when-required (quoteDr dr) 'neverPublish) (quoteTy ty))))]
+         (contracts-module+ name 
+                            (context 'name 
+                                     (interactioncontract 
+                                      'when-required (quoteDr dr) 'neverPublish) (quoteTy ty))))]
     [(_ define-context name ty [when-provided nm get dr pub])
      #`(begin
-         (contracts-module+ name (context 'name 
-                                          (interactioncontract 
-                                           nm             (quoteDr dr) (quotePub pub)) (quoteTy ty))))]
+         (contracts-module+ name 
+                            (context 'name 
+                                     (interactioncontract 
+                                      nm             (quoteDr dr) (quotePub pub)) (quoteTy ty))))]
     [(_ define-source name ty)
      #`(begin
          (contracts-module+ name (source 'name (quoteTy ty))))]
@@ -178,7 +181,7 @@
 ;; this procedure gets called when a developer uses the (define-{context,..} x ..) macros
 ;; it instantiates the (implement-x ... ) macro, too.
 (define-syntax (define-something stx)
-  (syntax-case stx ()
+  (syntax-case stx (define-something)
     [(define-something type name rest ...)
      (with-syntax 
          ([structnm    (make-id "~a-structure" stx #'name)]
