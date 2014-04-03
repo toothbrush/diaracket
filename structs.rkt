@@ -104,8 +104,8 @@
           [output-term (case activ
                          ['when-required (list out)]
                          [else           (list none/c)])] 
-          ; TODO think about the impossible-contract being applicable, if a continuation 
-          ; should be used.
+          ; TODO think about the impossible-contract none/c being applicable,
+          ; if a continuation should be used.
           ; realise that this doesn't change much: the blame is laid, but potential
           ; "damage" can already be
           ; done in the context. only useful thing is that if publish is never used, 

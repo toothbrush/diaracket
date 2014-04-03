@@ -19,9 +19,7 @@
     ['int  number?]
     ['bool boolean?]
     ['void void?]
-    [else (error "nonsense type! " ty)]
-    )
-  )
+    [else (error "nonsense type! " ty)]))
 
 (define make-id
   (case-lambda
@@ -34,8 +32,7 @@
 (define-syntax (quoteDr stx)
   (syntax-case stx (nothing)
     [(_ nothing) #''none]
-    [(_ v)       #'v]
-    ))
+    [(_ v)       #'v]))
 
 (define-syntax (quotePub stx)
   (syntax-case stx (always_publish maybe_publish)
@@ -52,11 +49,9 @@
 (define-syntax (quoteTy stx)
   (syntax-case stx (Boolean Integer)
     [(_ Boolean) #''bool]
-    [(_ Integer) #''int]
-    ))
+    [(_ Integer) #''int]))
 
 ;; gets the implementation term
 (define (lookupImplementation needle)
   (let ([str (hash-ref implementationsHash needle)])
-    (vector-ref (struct->vector str) 2)
-    ))
+    (vector-ref (struct->vector str) 2)))

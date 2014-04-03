@@ -1,11 +1,8 @@
 #lang racket
 
-(require diaracket/useful)
-(require diaracket/structs)
-(require diaracket/memory)
-(require (for-syntax diaracket/structs))
-(require (for-syntax diaracket/useful))
-(require (for-syntax diaracket/memory))
+(require diaracket/useful  (for-syntax diaracket/useful))
+(require diaracket/structs (for-syntax diaracket/structs))
+(require diaracket/memory  (for-syntax diaracket/memory))
 (require (for-syntax racket/contract))
 (require (for-syntax racket/list))
 
@@ -13,13 +10,10 @@
          (all-from-out diaracket/useful)
          (all-from-out diaracket/memory)
          (except-out (all-from-out racket) #%module-begin)
-         (rename-out [module-begin #%module-begin])
-         )
-
-
+         (rename-out [specification-module-begin         #%module-begin]))
 
 ;todo solve issue where we must group declarations.
-(define-syntax (process-body stx)
+(define-syntax (process-spec-body stx)
   (syntax-case stx (define-action define-source define-context define-controller)
     [(_ 
       ((define-action     nma tya) ...)
@@ -28,7 +22,7 @@
       ((define-controller nmd     ctrb) ...)
       )
      (with-syntax ([run (make-id "run" stx)]
-                   [module-begin-inner (make-id "module-begin-inner" stx)])
+                   [implementation-module-begin (make-id "module-begin-inner" stx)])
        #`(begin
            (clearList) ;; reset the defined-components list.
            
@@ -78,13 +72,13 @@
                     (all-from-out diaracket/diaspec)
                     (all-from-out diaracket/memory)
                     (except-out (all-from-out racket) #%module-begin)
-                    (rename-out [module-begin-inner   #%module-begin]))
+                    (rename-out [implementation-module-begin   #%module-begin]))
            
            (define (run)
              (runfw (lambda (x) (lookupImplementation x)) ; delay evaluation of sysdescription till later.
                     (sysdescription)))
            
-           (define-syntax (module-begin-inner stx2)
+           (define-syntax (implementation-module-begin stx2)
              (syntax-case stx2 (implement taxonomy)
                [(_ (taxonomy f)
                    (implement decls (... ...)) (... ...)
@@ -97,13 +91,13 @@
                   #'(#%module-begin
                      (require diaracket/memory)
                      (emptyHash)
-                     taxo (... ...)
+                     taxo (... ...) ; include syntax from taxo-file
                      (implement decls (... ...)) (... ...)
                      ))]))
            ))]))
 
-;; this macro splices in the taxonomy files.
-(define-syntax (module-begin stx)
+;; this macro splices in the taxonomy specification files.
+(define-syntax (specification-module-begin stx)
   (syntax-case stx (taxonomy define-action define-source define-context define-controller)
     [(_ 
       (taxonomy f)
@@ -114,10 +108,9 @@
                    [module-begin-inner (make-id "module-begin-inner" stx)]
                    [(taxo ...) (datum->syntax stx (port->syntax
                                                    (open-input-file 
-                                                    (syntax->datum #'f)) (list)))]
-                   )
+                                                    (syntax->datum #'f)) (list)))])
        #`(#%module-begin
-          (process-body 
+          (process-spec-body 
            taxo ...
            ((define-context    nmc tyc ctra) ...)
            ((define-controller nmd     ctrb) ...)
@@ -205,7 +198,7 @@
   (syntax-case stx ()
     [(define-something type name rest ...)
      (with-syntax 
-         ([structnm    (make-id "~a-impl" stx #'name)]
+         ([structnm    (make-id "~a-structure" stx #'name)]
           [giveimp     (make-id "implement-~a" stx #'name)]
           [contract-id (make-id "~a-contract" stx #'name)]
           )
@@ -213,30 +206,28 @@
            (define-struct/contract structnm
              ([spec   any/c]
               [implem (giveContract name)]
-              )  #:transparent )
+              ) #:transparent )
            (provide (struct-out structnm) giveimp)
            (define-syntax (giveimp fstx)
              (syntax-case fstx ()
                [(_ f)
                 (with-syntax 
-                    ([modname   (make-id "~a-module" fstx #'name)]
-                     [theimp    (make-id "the-~a"    fstx #'name)]
+                    ([modname   (make-id "~a-submodule" fstx #'name)]
+                     [theimp    (make-id "~a-implementation" fstx #'name)]
                      [require-spec 
                       (datum->syntax 
                        fstx
                        `(submod
                          "."
-                         ,(make-id "~a-module" fstx #'name)))]
+                         ,(make-id "~a-submodule" fstx #'name)) ; argh duplication. with-syntax isn't recursive
+                       )]
                      [rs2 (datum->syntax
                            fstx
-                           `(submod #,(mymodname) contracts))]
-                     )
-                  
+                           `(submod #,(mymodname) contracts))])
                   #'(begin
                       (module modname racket
                         (require diaracket/useful)
-                        (require diaracket/structs)
-                        (require (for-syntax diaracket/structs))
+                        (require diaracket/structs (for-syntax diaracket/structs))
                         (require rs2)
                         (provide theimp)
                         (define/contract theimp contract-id f)
