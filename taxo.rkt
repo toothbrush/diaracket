@@ -7,7 +7,7 @@
 ;; it is syntactically spliced into the top of the specification file.
 
 
-(define-action Fan Integer)
+(define-action Screen Picture)
 
-(define-source Temperature Integer)
-(define-source Dial Integer)
+(define-source Camera Picture)
+(define-source Button Boolean)

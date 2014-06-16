@@ -1,6 +1,6 @@
 #lang racket
 
-(require diaracket/useful (for-syntax diaracket/useful))
+(require "useful.rkt" (for-syntax "useful.rkt"))
 (require (for-syntax racket/contract))
 (provide (all-defined-out))
 

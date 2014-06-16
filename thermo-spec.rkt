@@ -1,17 +1,10 @@
-#lang s-exp diaracket/diaspec
+#lang s-exp "diaspec.rkt"
 
 ; these sources and actions should be defined elsewhere, in a central taxonomy.
 (taxonomy "taxo.rkt")
 
-(define-context DesiredTemperature Integer [when-required
-                                            get Dial])
+(define-context ProcessPicture Picture [when-provided Button
+                                                      get Camera
+                                                      maybe_publish])
 
-(define-context Thermostat Boolean [when-provided Temperature
-                                                  get DesiredTemperature
-                                                  maybe_publish])
-
-(define-context BoringTest Integer [when-provided Temperature
-                                                  get nothing
-                                                  always_publish])
-
-(define-controller FanSpeed [when-provided Thermostat do Fan])
+(define-controller ShowPicture [when-provided ProcessPicture do Screen])

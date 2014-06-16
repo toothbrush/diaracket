@@ -1,7 +1,8 @@
 #lang racket
 
+(require racket/draw)
 (provide (all-defined-out))
-(require diaracket/memory)
+(require "memory.rkt")
 
 ;; helper functions
 (define (display-line . args)
@@ -12,12 +13,14 @@
   (match t
     ['int  #t]
     ['bool #t]
+    ['pic  #t]
     [else  (error "not a type! " t)]))
 
 (define-syntax-rule (interp ty)
   (match ty
     ['int  number?]
     ['bool boolean?]
+    ['pic  (is-a?/c bitmap%)]
     ['void void?]
     [else (error "nonsense type! " ty)]))
 
@@ -47,9 +50,10 @@
       [else             (port->syntax p (append acc (list v)))])))
 
 (define-syntax (quoteTy stx)
-  (syntax-case stx (Boolean Integer)
+  (syntax-case stx (Boolean Integer Picture)
     [(_ Boolean) #''bool]
-    [(_ Integer) #''int]))
+    [(_ Integer) #''int]
+    [(_ Picture) #''pic]))
 
 ;; gets the implementation term
 (define (lookupImplementation needle)

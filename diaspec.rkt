@@ -1,14 +1,14 @@
 #lang racket
 
-(require diaracket/useful  (for-syntax diaracket/useful))
-(require diaracket/structs (for-syntax diaracket/structs))
-(require diaracket/memory  (for-syntax diaracket/memory))
+(require "useful.rkt"  (for-syntax "useful.rkt"))
+(require "structs.rkt" (for-syntax "structs.rkt"))
+(require "memory.rkt"  (for-syntax "memory.rkt"))
 (require (for-syntax racket/contract))
 (require (for-syntax racket/list))
 
 (provide (all-defined-out)
-         (all-from-out diaracket/useful)
-         (all-from-out diaracket/memory)
+         (all-from-out "useful.rkt")
+         (all-from-out "memory.rkt")
          (except-out (all-from-out racket)       #%module-begin)
          (rename-out [specification-module-begin #%module-begin]))
 
@@ -30,10 +30,10 @@
            ; pre-empt the contract which checks the description's validity
            (let ([dummy (sysdescription)]) (display-line "System seems reasonable."))
            
-           (require diaracket/structs)
-           (require diaracket/useful)
-           (require diaracket/fwexec)
-           (require diaracket/memory)
+           (require "structs.rkt")
+           (require "useful.rkt")
+           (require "fwexec.rkt")
+           (require "memory.rkt")
            (require racket)
            
            (begin-for-syntax
@@ -54,11 +54,11 @@
            
            (provide (all-defined-out)
                     run
-                    (all-from-out diaracket/structs)
-                    (all-from-out diaracket/useful)
-                    (all-from-out diaracket/fwexec)
-                    (all-from-out diaracket/diaspec)
-                    (all-from-out diaracket/memory)
+                    (all-from-out "structs.rkt")
+                    (all-from-out "useful.rkt")
+                    (all-from-out "fwexec.rkt")
+                    (all-from-out "diaspec.rkt")
+                    (all-from-out "memory.rkt")
                     (except-out (all-from-out racket) #%module-begin)
                     (rename-out [implementation-module-begin   #%module-begin]))
            
@@ -77,7 +77,7 @@
                   (check-presence-of-implementations 
                    (storage-now rest) #'((implement decls (... ...)) (... ...)))
                   #'(#%module-begin
-                     (require diaracket/memory)
+                     (require "memory.rkt")
                      (emptyHash)
                      taxo (... ...) ; include syntax from taxo-file
                      (implement decls (... ...)) (... ...)
@@ -126,8 +126,8 @@
            (define name obj)
            (provide name)
            (module+ contracts
-             (require diaracket/structs)
-             (require diaracket/useful)
+             (require "structs.rkt")
+             (require "useful.rkt")
              (define  contract-id (giveContract obj))
              (provide contract-id)
              )))]))
@@ -203,9 +203,9 @@
                            fstx
                            `(submod #,(mymodname) contracts))])
                   #`(begin
-                      (module modname racket
-                        (require diaracket/useful)
-                        (require diaracket/structs (for-syntax diaracket/structs))
+                      (module modname racket/gui
+                        (require "useful.rkt")
+                        (require "structs.rkt" (for-syntax "structs.rkt"))
                         (require rs2)
                         (provide theimp)
                         (define/contract theimp contract-id f))
