@@ -4,7 +4,7 @@
 (require "structs.rkt" (for-syntax "structs.rkt"))
 (require "memory.rkt"  (for-syntax "memory.rkt"))
 (require (for-syntax racket/contract))
-(require (for-syntax racket/list))
+(require (for-syntax racket/list racket/match))
 
 (provide (all-defined-out)
          (all-from-out "useful.rkt")
@@ -37,7 +37,18 @@
            (require racket)
            
            (begin-for-syntax
-             (remember nm taxo) ...)
+             (let ([where (match 'define-keyword
+                                    ['define-action  #'taxo]
+                                    ['define-source #'taxo]
+                                    ['define-context #'rest]
+                                    ['define-controller #'rest]
+               )])
+               (eval #`(remember nm #,where))
+               ;(display-line "storage == " (eval #`(storage-now #,where)))
+               ) ... )
+                 
+           
+             
            
            (define-syntax (implement sstx)
              (syntax-case sstx []
@@ -110,9 +121,9 @@
      (syntax-case st ()
        [(_ a _) (set! provided-names (cons (syntax->datum #'a) provided-names))]
        )) (syntax-e provided))
-  (display-line "gurgle bluh. required = " required)
   (map (lambda (req) 
          (display-line "checking " req)
+         ; TODO give a list of errors, don't stop at the first one?
          (unless (ormap (lambda (candidate) (equal? candidate req)) provided-names)
                        (raise-syntax-error req ": component not implemented! use (implement ... )"))
          ) required))

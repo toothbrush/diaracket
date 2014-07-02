@@ -9,7 +9,7 @@
 ;TODO oops, cannot do (implement ...) in REPL??
 (implement ShowPicture
            (lambda (pic screenshow)
-             ;(dynamic-require 'net/http-client void)
+             (dynamic-require 'net/http-client (void))
              (eval '(require net/http-client json))
              (eval '(define-values (status header response)
                       (http-sendrecv "httpbin.org" "/ip" #:ssl? 'tls)))
@@ -24,5 +24,13 @@
                (publish pic)
                )))
 
+(implement ShowAd
+           (lambda (str publish)
+             (let ([bmp (make-bitmap 100 100)])
+               (publish bmp))))
+
+(implement FetchAd
+           (lambda (_button getInternetInt pub)
+             (pub "hello, this is ad #..")))
 
 ; let's have some ads as well. wonderful ads.

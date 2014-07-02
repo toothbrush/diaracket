@@ -12,17 +12,14 @@
 ;; of the declared identifiers. then, an implementation file
 ;; can be analysed for validity, at transform time.
 (begin-for-syntax 
-  (define (display-line . args)
-  (for-each display args)
-  (newline))
+  
   ; empty storage as a starting point
   (define storage      '())
   (define storage-taxo '())
   
   ; eventually these will be inserted, as syntax, into
   ; the generated modules.
-  (define (add-rest! x) (set! storage (cons x storage))
-    (display-line "after add-rest! => " storage))
+  (define (add-rest! x) (set! storage (cons x storage)))
   (define (add-taxo! x) (set! storage-taxo (cons x storage-taxo)))
   )
 
@@ -30,7 +27,6 @@
   (syntax-case stx (storage-now rest taxo)
     [(storage-now rest)
      (with-syntax ([syms storage])
-       (display-line "returning some symbols... storage = " storage)
        #'(quote syms))]
     [(storage-now taxo)
      (with-syntax ([syms storage-taxo])
