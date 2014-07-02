@@ -13,6 +13,7 @@
   (match t
     ['int  #t]
     ['bool #t]
+    ['str  #t]
     ['pic  #t]
     [else  (error "not a type! " t)]))
 
@@ -20,6 +21,7 @@
   (match ty
     ['int  number?]
     ['bool boolean?]
+    ['str  string?]
     ['pic  (is-a?/c bitmap%)]
     ['void void?]
     [else (error "nonsense type! " ty)]))
@@ -50,9 +52,10 @@
       [else             (port->syntax p (append acc (list v)))])))
 
 (define-syntax (quoteTy stx)
-  (syntax-case stx (Boolean Integer Picture)
+  (syntax-case stx (Boolean Integer Picture String)
     [(_ Boolean) #''bool]
     [(_ Integer) #''int]
+    [(_ String ) #''str]
     [(_ Picture) #''pic]))
 
 ;; gets the implementation term

@@ -110,7 +110,10 @@
      (syntax-case st ()
        [(_ a _) (set! provided-names (cons (syntax->datum #'a) provided-names))]
        )) (syntax-e provided))
-  (map (lambda (req) (unless (ormap (lambda (candidate) (equal? candidate req)) provided-names)
+  (display-line "gurgle bluh. required = " required)
+  (map (lambda (req) 
+         (display-line "checking " req)
+         (unless (ormap (lambda (candidate) (equal? candidate req)) provided-names)
                        (raise-syntax-error req ": component not implemented! use (implement ... )"))
          ) required))
 

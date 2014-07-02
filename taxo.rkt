@@ -11,3 +11,5 @@
 
 (define-source Camera Picture)
 (define-source Button Boolean)
+
+(define-source TheInternet Integer)

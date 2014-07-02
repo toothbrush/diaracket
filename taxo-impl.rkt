@@ -20,21 +20,18 @@
 
 (implement Button
            (lambda ()
-             ; the button should always trigger
+             ;placeholder: the button should always trigger
              #t
              ))
 
-
+(implement TheInternet
+           (lambda ()
+             5
+             )) ;; return some value from the web
 
 
 #|
 
 #lang racket/gui
-
-(define bitmap (read-bitmap "/tmp/red-arrow.bmp"))
-
-(define f (new frame% [label "Bitmap"]))
-(new message% [parent f] [label bitmap])
-(send f show #t)
 
 |#

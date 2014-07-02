@@ -23,3 +23,6 @@
              (let ([pic (cameraGetPic)])
                (publish pic)
                )))
+
+
+; let's have some ads as well. wonderful ads.
