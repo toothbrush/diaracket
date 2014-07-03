@@ -7,9 +7,8 @@
 (taxonomy "taxo-impl.rkt")
 
 ;TODO oops, cannot do (implement ...) in REPL??
-(implement ShowPicture
+(implement ShowPicture ; controller
            (lambda (pic screenshow)
-             (dynamic-require 'net/http-client (void))
              (eval '(require net/http-client json))
              (eval '(define-values (status header response)
                       (http-sendrecv "httpbin.org" "/ip" #:ssl? 'tls)))
@@ -17,11 +16,17 @@
              (screenshow pic)
              ))
 
-(implement ProcessPicture
+(implement ProcessPicture ; context
            (lambda (_button cameraGetPic publish nopublish)
-             (display-line "[ProcessPicture] entering ")
-             (let ([pic (cameraGetPic)])
+             (let* ([pic (cameraGetPic)]
+                    [dc  (new bitmap-dc% [bitmap pic])])
                ; do some fancy processing
+               (send dc set-pen (make-pen #:width 5))
+               (send dc set-brush (make-brush #:color (make-color 112 66 20 0.4)))
+               (send dc draw-rounded-rectangle 
+                     5   5   ; x y
+                     116 116 ; w h
+                     )
                (publish pic)
                )))
 
@@ -33,12 +38,15 @@
                     [dc  (new bitmap-dc% [bitmap bmp])]
                     )
                (send dc draw-rectangle
-                     0  10  ; Top-left at (0, 10), 10 pixels down from top-left
+                     0   10  ; Top-left at (0, 10), 10 pixels down from top-left
                      250 80) ; 30 pixels wide and 10 pixels high
+               (send dc draw-text str
+                     10  20)
                (publish bmp))))
 
 (implement FetchAd
-           (lambda (_button getInternetInt pub)
-             (pub "hello, this is ad #..")))
+           (lambda (_button ip publish)
+             (publish (~a "hello, this is ad #" (ip)))))
 
-;; todo keyword blacklisting
+;; todo make IP device more convincing
+;; todo keyword blacklisting, only for ctx, ctrs

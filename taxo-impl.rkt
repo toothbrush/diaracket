@@ -15,7 +15,7 @@
 (implement Camera
            (lambda ()
              (display-line "Returning a predefined image.")
-             (read-bitmap "./sample.png")
+             (read-bitmap "./sample.jpg")
              ))
 
 (implement Button
@@ -24,7 +24,7 @@
              #t
              ))
 
-(implement TheInternet
+(implement IP
            (lambda ()
              5
              )) ;; return some value from the web
