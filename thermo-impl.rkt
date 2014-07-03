@@ -21,16 +21,24 @@
            (lambda (_button cameraGetPic publish nopublish)
              (display-line "[ProcessPicture] entering ")
              (let ([pic (cameraGetPic)])
+               ; do some fancy processing
                (publish pic)
                )))
 
+; let's have some ads as well. wonderful ads.
+
 (implement ShowAd
            (lambda (str publish)
-             (let ([bmp (make-bitmap 100 100)])
+             (let* ([bmp (make-bitmap 300 100)]
+                    [dc  (new bitmap-dc% [bitmap bmp])]
+                    )
+               (send dc draw-rectangle
+                     0  10  ; Top-left at (0, 10), 10 pixels down from top-left
+                     250 80) ; 30 pixels wide and 10 pixels high
                (publish bmp))))
 
 (implement FetchAd
            (lambda (_button getInternetInt pub)
              (pub "hello, this is ad #..")))
 
-; let's have some ads as well. wonderful ads.
+;; todo keyword blacklisting
