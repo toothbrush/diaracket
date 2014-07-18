@@ -222,10 +222,8 @@
                         (require "structs.rkt" (for-syntax "structs.rkt"))
                         (require rs2)
                         
-                        ; should be:
-                        ; IF DEVICE then provide 
+                        ; IF DEVICE then provide.
                         #,(cond [(equal? 'type 'define-source)
-                               ;(display-line "1 requiring net/http-client")
                                #'(require net/http-client json)]
                               )
                         (provide theimp)

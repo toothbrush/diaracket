@@ -21,9 +21,8 @@
                (send dc set-pen (make-pen #:width 5))
                (send dc set-brush (make-brush #:color (make-color 112 66 20 0.4)))
                (send dc draw-rounded-rectangle 
-                     5   5   ; x y
-                     116 116 ; w h
-                     )
+                     5   5    ; x y
+                     116 116) ; w h
                (publish pic)
                )))
 
@@ -39,7 +38,6 @@
                      10  20)
                (send dc draw-bitmap pic
                      10 100) ; superimpose the bmp
-               
                (publish canvas))))
 
 ; let's have some ads as well. wonderful ads.
@@ -48,5 +46,4 @@
            (lambda (ip) ; no publish function, because WhenRequired.
              (~a "showing Ad for IP " (ip))))
 
-;; todo make IP device more convincing
 ;; todo keyword blacklisting, only for ctx, ctrs

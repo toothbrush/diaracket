@@ -6,7 +6,6 @@
 ;; note for the meantime that this file isn't independently loadable --
 ;; it is syntactically spliced into the top of the specification file.
 
-
 (define-action Screen Picture)
 
 (define-source Camera Picture)

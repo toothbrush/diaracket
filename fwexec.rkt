@@ -1,4 +1,4 @@
-#lang racket
+#lang racket/gui
 ;;; The example implementation of a framework which takes the interaction description from
 ;;; the "warnfw" module and polls the sources, etc.
 
@@ -93,12 +93,24 @@
     val)))
 
 (define/contract (runfw deployment sysdesc) (-> procedure? diaspec? void?)
-  (for-each (lambda (source) ; poll all sources
-              ;; broadcast source value to all subscribed.
-              (let* ([nm     (source-name source)]
-                     [theSrc (deployment nm)])
-                (display-line "[ fw ] querying [src] " nm)
-                (let ([val (theSrc)])
-                  (display-line "[src ] " nm " returns: " val)
-                  (contextsFor nm val deployment sysdesc))))
-            (diaspec-sources sysdesc)))
+  ;; here we distinguish the case where a Button is a source.
+  ;; we assume a Button should be more reactive, i.e. shouldn't be 
+  ;; polled. 
+  (if (member 'Button (map source-name (diaspec-sources sysdesc)))
+      (let ([f (new frame% [label "App"])])
+        (new button% [parent f] 
+             [label "Take picture!"]
+             [callback (lambda (_button _event)
+                         (let* ([nm     'Button])
+                           (contextsFor nm #t deployment sysdesc)))])
+        (send f show #t))
+      (for-each (lambda (source) ; poll all sources
+                  ;; broadcast source value to all subscribed.
+                  (let* ([nm     (source-name source)]
+                         [theSrc (deployment nm)])
+                    (display-line "[ fw ] querying [src] " nm)
+                    (let ([val (theSrc)])
+                      (display-line "[src ] " nm " returns: " val)
+                      (contextsFor nm val deployment sysdesc))))
+                (diaspec-sources sysdesc))
+      ))
