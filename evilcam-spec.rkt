@@ -1,6 +1,6 @@
 #lang s-exp "diaspec.rkt"
 
-; these sources and actions should be defined elsewhere, in a central taxonomy.
+; the sources and actions should be defined elsewhere, in a central taxonomy.
 (taxonomy "taxo.rkt")
 
 (define-context MakeAd String [when-required get IP])

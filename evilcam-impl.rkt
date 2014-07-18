@@ -1,9 +1,9 @@
-#lang s-exp "thermo-spec.rkt"
+#lang s-exp "evilcam-spec.rkt"
 
 ;; here we will provide the implementations of the
-;; various components.
+;; various components defined in the specification file referenced above
 
-; import the available resources:
+; import the implementations of the available resources from the taxonomy:
 (taxonomy "taxo-impl.rkt")
 
 ;TODO oops, cannot do (implement ...) in REPL??

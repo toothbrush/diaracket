@@ -224,8 +224,10 @@
                         
                         ; should be:
                         ; IF DEVICE then provide 
-                        (require net/http-client json)
-                        
+                        #,(cond [(equal? 'type 'define-source)
+                               ;(display-line "1 requiring net/http-client")
+                               #'(require net/http-client json)]
+                              )
                         (provide theimp)
                         (define/contract theimp contract-id f))
                       (require #,(datum->syntax fstx `(submod "." ,#'modname)))
