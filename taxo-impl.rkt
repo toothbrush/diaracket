@@ -26,12 +26,9 @@
 
 (implement IP
            (lambda ()
-     
              (define-values (status header response)
-                      (http-sendrecv "httpbin.org" "/ip" #:ssl? 'tls))
-             (let ([resp (read-json response)])
-               (display-line "http thing? => " resp)
-               (hash-ref resp 'origin "oops")
+               (http-sendrecv "httpbin.org" "/ip" #:ssl? 'tls))
+             (let ([js (read-json response)])
+               (hash-ref js 'origin "oops")
                )
              )) ;; return some value from the web
-          
