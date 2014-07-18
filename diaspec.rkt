@@ -221,6 +221,11 @@
                         (require "useful.rkt")
                         (require "structs.rkt" (for-syntax "structs.rkt"))
                         (require rs2)
+                        
+                        ; should be:
+                        ; IF DEVICE then provide 
+                        (require net/http-client json)
+                        
                         (provide theimp)
                         (define/contract theimp contract-id f))
                       (require #,(datum->syntax fstx `(submod "." ,#'modname)))

@@ -12,4 +12,4 @@
 (define-source Camera Picture)
 (define-source Button Boolean)
 
-(define-source IP Integer)
+(define-source IP String)

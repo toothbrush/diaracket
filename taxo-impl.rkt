@@ -20,18 +20,18 @@
 
 (implement Button
            (lambda ()
-             ;placeholder: the button should always trigger
+             ;placeholder: the button is pushed
              #t
              ))
 
 (implement IP
            (lambda ()
-             5
+     
+             (define-values (status header response)
+                      (http-sendrecv "httpbin.org" "/ip" #:ssl? 'tls))
+             (let ([resp (read-json response)])
+               (display-line "http thing? => " resp)
+               (hash-ref resp 'origin "oops")
+               )
              )) ;; return some value from the web
-
-
-#|
-
-#lang racket/gui
-
-|#
+          

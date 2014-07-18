@@ -9,11 +9,7 @@
 ;TODO oops, cannot do (implement ...) in REPL??
 (implement ShowPicture ; controller
            (lambda (pic screenshow)
-             (eval '(require net/http-client json))
-             (eval '(define-values (status header response)
-                      (http-sendrecv "httpbin.org" "/ip" #:ssl? 'tls)))
-             (eval `(display-line "http thing? => " (read-json response)))
-             (screenshow pic)
+              (screenshow pic)
              ))
 
 (implement ProcessPicture ; context
@@ -46,7 +42,7 @@
 
 (implement FetchAd
            (lambda (_button ip publish)
-             (publish (~a "hello, this is ad #" (ip)))))
+             (publish (~a "hello, IP = " (ip)))))
 
 ;; todo make IP device more convincing
 ;; todo keyword blacklisting, only for ctx, ctrs
