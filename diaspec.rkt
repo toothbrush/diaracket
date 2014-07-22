@@ -28,7 +28,7 @@
            (define-something        define-keyword nm args ...) ...
            
            ; pre-empt the contract which checks the description's validity
-           (let ([dummy (sysdescription)]) (display-line "System seems reasonable."))
+           (let ([dummy (sysdescription)]) (display-line "System [specification] seems reasonable."))
            
            (require "structs.rkt")
            (require "useful.rkt")
@@ -121,6 +121,7 @@
      (syntax-case st ()
        [(_ a _) (set! provided-names (cons (syntax->datum #'a) provided-names))]
        )) (syntax-e provided))
+  (display-line "provided names == " provided-names)
   (map (lambda (req) 
          (display-line "checking " req)
          (unless (ormap (lambda (candidate) (equal? candidate req)) provided-names)
@@ -192,20 +193,6 @@
 
 
 
-; here we'll inspect the given implementation for evilness.
-(define-syntax (attach-impl stx)
-  (syntax-case stx (attach-impl)
-    [(attach-impl bindername contract implementation)
-     #`(begin
-         
-         (cond [#,(isreasonable #'bindername #'implementation) (void)]
-               [else (raise-syntax-error 'bindername 
-                      "provided function unreasonable!") ])
-         
-         (define/contract bindername contract implementation))
-     ]))
-
-
 
 ;define-syntax is necessary since we need to introduce identifiers.
 ;; this procedure gets called when a developer uses the (define-{context,..} x ..) macros
@@ -232,25 +219,29 @@
                      [rs2 (datum->syntax
                            fstx
                            `(submod #,(mymodname) contracts))])
-                  #`(begin
-                      (module modname racket/gui
-                        (require "useful.rkt")
-                        (require "structs.rkt" (for-syntax "structs.rkt"))
-                        (require rs2)
-                        (require (only-in "diaspec.rkt" attach-impl ))
-                       ; (require (for-syntax (only-in "diaspec.rkt" isreasonable)))
-                                                      
-                        ; IF DEVICE then provide net access.
-                        #,(cond [(equal? 'type 'define-source)
-                               #'(require net/http-client json)]
-                              )
-                        (provide theimp)
-                        ; TODO a good spot to inspect f, pass it off to some other func.
-                        (attach-impl theimp contract-id f))
-                      (require #,(datum->syntax fstx `(submod "." ,#'modname)))
-                      (setimpl 'name (structnm name theimp))
-                      (display-line "Implementation " 'name " stored.")
-                      ))]))
+                  ; here we'll inspect the given implementation for evilness.
+                  (if (isreasonable #'theimp #'f)
+                      #`(begin
+                          (module modname racket/gui
+                            (require "useful.rkt")
+                            (require "structs.rkt" (for-syntax "structs.rkt"))
+                            (require rs2)
+                            
+                            ; IF DEVICE then provide net access.
+                            #,(cond [(equal? 'type 'define-source)
+                                     #'(require net/http-client json)]
+                                    )
+                            (provide theimp)
+                            ; TODO a good spot to inspect f, pass it off to some other func.
+                            (define/contract theimp contract-id f))
+                          (require #,(datum->syntax fstx `(submod "." ,#'modname)))
+                          (setimpl 'name (structnm name theimp))
+                          (display-line "Implementation " 'name " stored.")
+                          )
+                      (raise-syntax-error 'name 
+                                          "provided function unreasonable! (uses eval)"
+                                          fstx #'f))
+                  )]))
            (display-line "[" (~a #:min-width 10 (string-upcase (symbol->string 'type)))
                          "] => " "implement " 'name " :: "  (contract-name  (giveContract name)))
            (addDeviceToList name)))]))

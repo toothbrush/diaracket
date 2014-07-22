@@ -77,10 +77,10 @@
                                    words)]
                 )
            
+           ; partially evaluate. TODO
            (cond 
              [(empty? evilwords) #t]
-             [else ;(raise-syntax-error (syntax->datum nm) "implementation uses eval, not allowed!")
-              #f]
+             [else  #f]
              )
            )
          )]
