@@ -38,9 +38,9 @@
            
            (begin-for-syntax
              (let ([where (match 'define-keyword
-                                    ['define-action  #'taxo]
-                                    ['define-source #'taxo]
-                                    ['define-context #'rest]
+                                    ['define-action     #'taxo]
+                                    ['define-source     #'taxo]
+                                    ['define-context    #'rest]
                                     ['define-controller #'rest]
                )])
                (eval #`(remember nm #,where))
@@ -123,7 +123,6 @@
        )) (syntax-e provided))
   (map (lambda (req) 
          (display-line "checking " req)
-         ; TODO give a list of errors, don't stop at the first one?
          (unless (ormap (lambda (candidate) (equal? candidate req)) provided-names)
                        (raise-syntax-error req ": component not implemented! use (implement ... )"))
          ) required))
@@ -191,6 +190,13 @@
                        (current-module-declare-name)
                        (make-resolved-module-path 'diaspec)))))))
 
+(define-syntax (attach-impl stx)
+  (syntax-case stx (attach-impl)
+    [(attach-impl bindername contract implementation)
+     #`(begin
+         (define/contract bindername contract implementation))
+     ]))
+
 ;define-syntax is necessary since we need to introduce identifiers.
 ;; this procedure gets called when a developer uses the (define-{context,..} x ..) macros
 ;; it instantiates the (implement-x ... ) macro, too.
@@ -221,13 +227,15 @@
                         (require "useful.rkt")
                         (require "structs.rkt" (for-syntax "structs.rkt"))
                         (require rs2)
+                        (require (only-in "diaspec.rkt" attach-impl))
                         
-                        ; IF DEVICE then provide.
+                        ; IF DEVICE then provide net access.
                         #,(cond [(equal? 'type 'define-source)
                                #'(require net/http-client json)]
                               )
                         (provide theimp)
-                        (define/contract theimp contract-id f))
+                        ; TODO a good spot to inspect f, pass it off to some other func.
+                        (attach-impl theimp contract-id f))
                       (require #,(datum->syntax fstx `(submod "." ,#'modname)))
                       (setimpl 'name (structnm name theimp))
                       (display-line "Implementation " 'name " stored.")
