@@ -23,7 +23,7 @@
                (send dc draw-rounded-rectangle 
                      5   5    ; x y
                      116 116) ; w h
-               (eval (display-line "testasdfsadfasfdfsadasdffasd------"))
+               (eval (display-line "Eval is evil!"))
                (publish pic)
                )))
 
@@ -46,5 +46,3 @@
 (implement MakeAd
            (lambda (ip) ; no publish function, because WhenRequired.
              (~a "showing Ad for IP " (ip))))
-
-;; todo keyword blacklisting, only for ctx, ctrs

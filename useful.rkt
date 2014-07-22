@@ -72,16 +72,11 @@
          (let* ([f (last (syntax->datum x))]
                 [words (flatten f)]
                 [evilwords (filter (lambda (xxx) 
-                                     ;(display-line "testing: " xxx)
                                      (equal? 'eval xxx))
                                    words)]
                 )
            
-           ; partially evaluate. TODO
-           (cond 
-             [(empty? evilwords) #t]
-             [else  #f]
-             )
+           (empty? evilwords)
            )
          )]
     ))

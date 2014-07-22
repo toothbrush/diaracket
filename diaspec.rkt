@@ -38,17 +38,17 @@
            
            (begin-for-syntax
              (let ([where (match 'define-keyword
-                                    ['define-action     #'taxo]
-                                    ['define-source     #'taxo]
-                                    ['define-context    #'rest]
-                                    ['define-controller #'rest]
-               )])
+                            ['define-action     #'taxo]
+                            ['define-source     #'taxo]
+                            ['define-context    #'rest]
+                            ['define-controller #'rest]
+                            )])
                (eval #`(remember nm #,where))
                ;(display-line "storage == " (eval #`(storage-now #,where)))
                ) ... )
-                 
            
-             
+           
+           
            
            (define-syntax (implement sstx)
              (syntax-case sstx []
@@ -76,7 +76,8 @@
            ; delay evaluation of lookupImplementation till later.
            (define (run)
              (runfw (lambda (x) (lookupImplementation x))
-                    (sysdescription)))
+                    (sysdescription))
+             )
            
            (define-syntax (implementation-module-begin stx2)
              (syntax-case stx2 (implement taxonomy)
@@ -85,14 +86,18 @@
                 (with-syntax ([(taxo (... ...)) (datum->syntax stx2 (port->syntax
                                                                      (open-input-file 
                                                                       (syntax->datum #'f)) (list)))])
-                  (check-presence-of-implementations 
-                   (storage-now rest) #'((implement decls (... ...)) (... ...)))
-                  #'(#%module-begin
-                     (require "memory.rkt")
-                     (emptyHash)
-                     taxo (... ...) ; include syntax from taxo-file
-                     (implement decls (... ...)) (... ...)
-                     ))]))
+                  (if (check-presence-of-implementations 
+                       (storage-now rest) #'((implement decls (... ...)) (... ...)))
+                      
+                       #'(#%module-begin
+                         (require "memory.rkt")
+                         (emptyHash)
+                         taxo (... ...) ; include syntax from taxo-file
+                         (implement decls (... ...)) (... ...)
+                         )
+                      (raise-syntax-error #f "Please check implementations."))
+                  
+                  )]))
            ))]))
 
 ;; this macro splices in the taxonomy specification files.
@@ -116,17 +121,28 @@
 ;; in the list "provided", which should be of the form (listof (implement _name_ ...))
 (define-for-syntax (check-presence-of-implementations required provided)
   (define provided-names '())
-  (map
-   (lambda (st)
-     (syntax-case st ()
-       [(_ a _) (set! provided-names (cons (syntax->datum #'a) provided-names))]
-       )) (syntax-e provided))
-  (display-line "provided names == " provided-names)
-  (map (lambda (req) 
-         (display-line "checking " req)
-         (unless (ormap (lambda (candidate) (equal? candidate req)) provided-names)
-                       (raise-syntax-error req ": component not implemented! use (implement ... )"))
-         ) required))
+  
+  (let ([check1 
+         (map
+          (lambda (st)
+            (syntax-case st ()
+              [(_ a imp) 
+               (if (isreasonable #'a #'imp)
+                   (begin (set! provided-names (cons (syntax->datum #'a) provided-names)) #t)
+                   (begin (raise-syntax-error 'a "implementation unreasonable, uses eval." st #'imp)
+                          #f)
+                   )]
+              )) (syntax-e provided))]
+        [check2
+         (map (lambda (req) 
+                (if (ormap (lambda (candidate) (equal? candidate req)) provided-names)
+                    #t
+                    (begin (raise-syntax-error req ": component not implemented! use (implement ... )") 
+                           #f)
+                    )
+                ) required)])
+    (andmap (lambda (x) x) (flatten (list check2 check1)))
+    ))
 
 ;; bind the definitions, and add their contracts to a submodule
 ;; so that the implementation-submodules can still access them.
