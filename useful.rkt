@@ -2,6 +2,7 @@
 
 (require racket/draw)
 (provide (all-defined-out))
+(provide (for-syntax (all-defined-out)))
 (require "memory.rkt")
 
 ;; helper functions
@@ -62,3 +63,25 @@
 (define (lookupImplementation needle)
   (let ([str (hash-ref implementationsHash needle)])
     (vector-ref (struct->vector str) 2)))
+
+
+(define-syntax (isreasonable stx)
+  (syntax-case stx (isreasonable)
+    [(isreasonable nm x)
+     #`(begin
+         (let* ([f (last (syntax->datum x))]
+                [words (flatten f)]
+                [evilwords (filter (lambda (xxx) 
+                                     ;(display-line "testing: " xxx)
+                                     (equal? 'eval xxx))
+                                   words)]
+                )
+           
+           (cond 
+             [(empty? evilwords) #t]
+             [else ;(raise-syntax-error (syntax->datum nm) "implementation uses eval, not allowed!")
+              #f]
+             )
+           )
+         )]
+    ))

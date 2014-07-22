@@ -190,12 +190,22 @@
                        (current-module-declare-name)
                        (make-resolved-module-path 'diaspec)))))))
 
+
+
+; here we'll inspect the given implementation for evilness.
 (define-syntax (attach-impl stx)
   (syntax-case stx (attach-impl)
     [(attach-impl bindername contract implementation)
      #`(begin
+         
+         (cond [#,(isreasonable #'bindername #'implementation) (void)]
+               [else (raise-syntax-error 'bindername 
+                      "provided function unreasonable!") ])
+         
          (define/contract bindername contract implementation))
      ]))
+
+
 
 ;define-syntax is necessary since we need to introduce identifiers.
 ;; this procedure gets called when a developer uses the (define-{context,..} x ..) macros
@@ -227,8 +237,9 @@
                         (require "useful.rkt")
                         (require "structs.rkt" (for-syntax "structs.rkt"))
                         (require rs2)
-                        (require (only-in "diaspec.rkt" attach-impl))
-                        
+                        (require (only-in "diaspec.rkt" attach-impl ))
+                       ; (require (for-syntax (only-in "diaspec.rkt" isreasonable)))
+                                                      
                         ; IF DEVICE then provide net access.
                         #,(cond [(equal? 'type 'define-source)
                                #'(require net/http-client json)]
