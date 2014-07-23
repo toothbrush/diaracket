@@ -12,6 +12,8 @@
               (screenshow pic)
              ))
 
+;(implement IP (lambda () "muahahaha")) ; <- impossible to reimplement taxo items
+
 (implement ProcessPicture ; context
            (lambda (_button cameraGetPic publish nopublish)
              (let* ([pic (cameraGetPic)]
