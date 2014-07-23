@@ -44,11 +44,7 @@
                             ['define-controller #'rest]
                             )])
                (eval #`(remember nm #,where))
-               ;(display-line "storage == " (eval #`(storage-now #,where)))
                ) ... )
-           
-           
-           
            
            (define-syntax (implement sstx)
              (syntax-case sstx []
@@ -121,23 +117,29 @@
 ;; in the list "provided", which should be of the form (listof (implement _name_ ...))
 (define-for-syntax (check-presence-of-implementations required provided)
   (define provided-names '())
-  
+  ; check that all functions are eval-free
   (let ([check1 
          (map
           (lambda (st)
             (syntax-case st ()
               [(_ a imp) 
                (if (isreasonable #'a #'imp)
-                   (begin (set! provided-names (cons (syntax->datum #'a) provided-names)) #t)
-                   (begin (raise-syntax-error 'a "implementation unreasonable, uses eval." st #'imp)
+                   (begin (set! provided-names (cons (syntax->datum #'a) provided-names))
+                          #t)
+                   (begin (raise-syntax-error (syntax->datum #'a) 
+                                              "implementation unreasonable, uses eval." 
+                                              st #'imp)
                           #f)
                    )]
               )) (syntax-e provided))]
+        ; check that all defined components are implemented
         [check2
          (map (lambda (req) 
                 (if (ormap (lambda (candidate) (equal? candidate req)) provided-names)
                     #t
-                    (begin (raise-syntax-error req ": component not implemented! use (implement ... )") 
+                    (begin (raise-syntax-error 
+                            req 
+                            ": component not implemented! use (implement ... )") 
                            #f)
                     )
                 ) required)])
@@ -248,7 +250,6 @@
                                      #'(require net/http-client json)]
                                     )
                             (provide theimp)
-                            ; TODO a good spot to inspect f, pass it off to some other func.
                             (define/contract theimp contract-id f))
                           (require #,(datum->syntax fstx `(submod "." ,#'modname)))
                           (setimpl 'name (structnm name theimp))

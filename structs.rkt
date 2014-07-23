@@ -104,10 +104,10 @@
           [output-term (case activ
                          ['when-required (list out)]
                          [else           (list none/c)])] 
-          ; TODO think about the impossible-contract none/c being applicable,
+          ; the impossible-contract none/c is applicable,
           ; if a continuation should be used.
           ; realise that this doesn't change much: the blame is laid, but potential
-          ; "damage" can already be
+          ; "damage" (e.g. evil manipulations) can already be
           ; done in the context. only useful thing is that if publish is never used, 
           ; there's a complaint, even 
           ; if only at runtime.
@@ -121,7 +121,7 @@
 
 
 ;;TODO add scribble docs everywhere.
-;; todo add:
+;; todo add unit tests:
 #|
 (module* test racket/base
   (require (submod "..")
