@@ -25,7 +25,7 @@
                (send dc draw-rounded-rectangle 
                      5   5    ; x y
                      116 116) ; w h
-               ;(eval (display-line "Eval is evil!"))
+               ;(eval (display-line "Eval is evil!")) ; TODO check that 'eval gives syntax error
                (publish pic)
                )))
 

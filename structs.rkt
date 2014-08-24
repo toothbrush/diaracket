@@ -112,6 +112,7 @@
           ; there's a complaint, even 
           ; if only at runtime.
           )
+      ; build the contract: believe it or not, it used to be uglier.
     (eval #`#,(append (list #'->) 
                       input-term 
                       dr-term

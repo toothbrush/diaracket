@@ -64,18 +64,19 @@
   (let ([str (hash-ref implementationsHash needle)])
     (vector-ref (struct->vector str) 2)))
 
-
+;; here we check that no taboo-words are present
+;; for the moment only (eval ..) is taboo, but one could
+;; easily expand this list.
 (define-syntax (isreasonable stx)
   (syntax-case stx (isreasonable)
     [(isreasonable nm x)
      #`(begin
          (let* ([f (last (syntax->datum x))]
                 [words (flatten f)]
-                [evilwords (filter (lambda (xxx) 
+                [evilwords (filter (lambda (xxx)
                                      (equal? 'eval xxx))
                                    words)]
                 )
-           
            (empty? evilwords)
            )
          )]
