@@ -1,6 +1,6 @@
 #lang info
 (define collection "diaracket")
-(define version "0.1.1")
+(define version "0.1.2")
 (define source-omit-files (list "FRTDiaspec.rkt"
                                 "typed-sketch-impl.rkt"
                                 "typed-sketch.rkt"
