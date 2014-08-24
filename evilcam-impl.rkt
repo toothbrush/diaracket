@@ -48,3 +48,5 @@
 (implement MakeAd
            (lambda (ip) ; no publish function, because WhenRequired.
              (~a "showing Ad for IP " (ip))))
+
+;TODO match up with diaspec in Paper: that is, camera is publishing device, no Button.
