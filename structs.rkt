@@ -109,12 +109,11 @@
           ; realise that this doesn't change much: the blame is laid, but potential
           ; "damage" (e.g. evil manipulations) can already be
           ; done in the context. only useful thing is that if publish is never used, 
-          ; there's a complaint, even 
-          ; if only at runtime.
+          ; there's a complaint, even if only at runtime.
           )
       ; build the contract: believe it or not, it used to be uglier.
-    (eval #`#,(append (list #'->) 
-                      input-term 
+    (eval #`#,(append (list #'->)
+                      input-term
                       dr-term
                       publish-term
                       nopublish-term
