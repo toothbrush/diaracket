@@ -1,5 +1,5 @@
 #lang frtime
-(require diaracket/useful)
+(require "useful.rkt")
 (require frtime/animation
          frtime/gui)
 (require racket/base)
