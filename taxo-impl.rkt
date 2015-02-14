@@ -30,3 +30,8 @@
              (let ([js (read-json response)])
                (hash-ref js 'origin "oops")
                ))) ;; return some value from the web
+
+(implement Geo
+           (lambda ()
+             ; for now we'll act as if this is the constant location:
+             "Amsterdam, the Netherlands"))

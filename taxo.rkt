@@ -12,3 +12,4 @@
 (define-source Button Boolean)
 
 (define-source IP String)
+(define-source Geo String)

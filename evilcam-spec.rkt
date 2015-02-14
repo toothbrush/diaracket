@@ -9,9 +9,9 @@
                                                       get Camera
                                                       maybe_publish])
 
-(define-context DisplayApp Picture     [when-provided ProcessPicture 
+(define-context ComposeDisplay Picture     [when-provided ProcessPicture 
                                                       get MakeAd 
                                                       always_publish])
 
-(define-controller ScreenController    [when-provided DisplayApp do Screen])
+(define-controller Display    [when-provided ComposeDisplay do Screen])
 

@@ -7,7 +7,7 @@
 (taxonomy "taxo-impl.rkt")
 
 ;TODO oops, cannot do (implement ...) in REPL??
-(implement ScreenController ; controller
+(implement Display ; controller
            (lambda (pic screenshow)
               (screenshow pic)
              ))
@@ -29,7 +29,7 @@
                (publish pic)
                )))
 
-(implement DisplayApp
+(implement ComposeDisplay
            (lambda (pic ad-str publish)
              (let* ([canvas (make-bitmap 450 450)]
                     [dc     (new bitmap-dc% [bitmap canvas])]
