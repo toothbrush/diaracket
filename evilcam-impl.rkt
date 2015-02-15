@@ -19,7 +19,7 @@
                     [dc  (new bitmap-dc% [bitmap pic])])
                
                ; do some fancy processing
-               (send dc set-pen (make-pen #:width 5))
+               (send dc set-pen   (make-pen #:width 5))
                (send dc set-brush (make-brush #:color (make-color 112 66 20 0.4)))
                (send dc draw-rounded-rectangle 
                      5   5    ; x y
@@ -46,4 +46,4 @@
            (lambda (ip) ; no publish function, because WhenRequired.
              (~a "showing Ad for IP " (ip))))
 
-;TODO match up with diaspec in Paper: that is, camera is publishing device, no Button.
+;TODO match up with diaspec in paper: that is, camera is publishing device, no Button.
