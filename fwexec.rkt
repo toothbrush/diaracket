@@ -1,6 +1,6 @@
 #lang racket/gui
-;;; The example implementation of a framework which takes the interaction description from
-;;; the "warnfw" module and polls the sources, etc.
+;;; The example implementation of a framework which takes the interaction description
+;;; and polls the sources, etc.
 
 (require "diaspec.rkt")
 (require "useful.rkt")
@@ -34,8 +34,7 @@
                    ;; and subscribed to the component that's publishing
                    (equal? (getName_activation activation)
                            name))
-              (fireContext ctx name val deployment sysdesc)
-              ])))
+              (fireContext ctx name val deployment sysdesc)])))
    (diaspec-contexts sysdesc)))
 
 (define (fireContext ctx name val deployment sysdesc)
@@ -62,8 +61,7 @@
                                        nopub-term))])
     (display-line "[ctx ] " nm " subscribed to <" name ">.")
     (display-line "[ fw ] querying [ctx] " nm)
-    (c:prompt (cont (c:control v (apply ctx_impl (call v)))) (c:abort (void)))
-    ))
+    (c:prompt (cont (c:control v (apply ctx_impl (call v)))) (c:abort (void)))))
 
 
 (define (pullValue asker deployment src/ctx)
@@ -112,5 +110,4 @@
                     (let ([val (theSrc)])
                       (display-line "[src ] " nm " returns: " val)
                       (contextsFor nm val deployment sysdesc))))
-                (diaspec-sources sysdesc))
-      ))
+                (diaspec-sources sysdesc))))

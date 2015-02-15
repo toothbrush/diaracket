@@ -75,9 +75,5 @@
                 [words (flatten f)]
                 [evilwords (filter (lambda (xxx)
                                      (equal? 'eval xxx))
-                                   words)]
-                )
-           (empty? evilwords)
-           )
-         )]
-    ))
+                                   words)])
+           (empty? evilwords)))]))

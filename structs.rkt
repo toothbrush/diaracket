@@ -6,13 +6,11 @@
 
 (define-struct/contract source
   ([name any/c]
-   [type type?]
-   ) #:transparent)
+   [type type?]) #:transparent)
 
 (define-struct/contract action
   ([name any/c]
-   [type type?]
-   ) #:transparent)
+   [type type?]) #:transparent)
 
 ;; here we check that the context's interaction contract is reasonable. e.g.
 ;; check that if a context A has a datarequirement which is another
@@ -33,13 +31,11 @@
             (source?  datareq)
             (and (context? datareq)
                  (eq? (interactioncontract-activation (context-interactioncontract datareq))
-                      'when-required))
-            )
+                      'when-required)))
         (or (eq? pub 'alwaysPublish)
             (eq? pub 'maybePublish)
             (if (eq? acti 'when-required)
-                (eq? pub 'neverPublish) #t)
-            ))))))
+                (eq? pub 'neverPublish) #t)))))))
 
 (define icForController?
   (lambda (ic)
@@ -52,8 +48,7 @@
 (define-struct/contract context
   ([name any/c]
    [interactioncontract icForContext?]
-   [type type?]
-   ) #:transparent)
+   [type type?]) #:transparent)
 
 (define (getName_activation obj)
   (cond
@@ -63,8 +58,7 @@
 
 (define-struct/contract controller
   ([name any/c]
-   [interactioncontract icForController?]
-   ) #:transparent)
+   [interactioncontract icForController?]) #:transparent)
 
 
 (define/contract
@@ -136,8 +130,7 @@
 (define (giveContractCtrl c)
   (let ([input  (context-type (interactioncontract-activation c))]
         [action (interactioncontract-publishoract c)])
-    (-> (interp input) (giveContractAct (action-type action)) void?)
-    ))
+    (-> (interp input) (giveContractAct (action-type action)) void?)))
 
 (define (getName obj)
   (apply 
@@ -157,8 +150,7 @@
   ([sources      (non-empty-listof source?)]
    [contexts     (non-empty-listof context?)]
    [controllers  (non-empty-listof controller?)]
-   [actions      (non-empty-listof action?)]
-   ) #:transparent)
+   [actions      (non-empty-listof action?)]) #:transparent)
 
 (define-syntax-rule (giveContract e)
   (cond 

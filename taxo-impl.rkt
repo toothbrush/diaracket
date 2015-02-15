@@ -8,28 +8,24 @@
            (lambda (bitmap)
              (let ([f (new frame% [label "Bitmap"])])
                (new message% [parent f] [label bitmap])
-               (send f show #t))
-             ))
+               (send f show #t))))
 
 (implement Camera
            (lambda ()
              (display-line "Returning a predefined image.")
-             (read-bitmap "./sample.jpg")
-             ))
+             (read-bitmap "./sample.jpg")))
 
 (implement Button
            (lambda ()
              ; placeholder: the button is reactive
-             #t
-             ))
+             #t))
 
 (implement IP
            (lambda ()
              (define-values (status header response)
                (http-sendrecv "httpbin.org" "/ip" #:ssl? 'tls))
              (let ([js (read-json response)])
-               (hash-ref js 'origin "oops")
-               ))) ;; return some value from the web
+               (hash-ref js 'origin "oops")))) ;; return some value from the web
 
 (implement Geo
            (lambda ()

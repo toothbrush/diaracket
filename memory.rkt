@@ -20,8 +20,7 @@
   ; eventually these will be inserted, as syntax, into
   ; the generated modules.
   (define (add-rest! x) (set! storage (cons x storage)))
-  (define (add-taxo! x) (set! storage-taxo (cons x storage-taxo)))
-  )
+  (define (add-taxo! x) (set! storage-taxo (cons x storage-taxo))))
 
 (define-syntax (storage-now stx)
   (syntax-case stx (storage-now rest taxo)
@@ -47,4 +46,3 @@
   (hash-map  implementationsHash 
              (lambda (k v) (hash-remove! implementationsHash k)))
   (void))
-

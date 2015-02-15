@@ -9,8 +9,7 @@
 ;TODO oops, cannot do (implement ...) in REPL??
 (implement Display ; controller
            (lambda (pic screenshow)
-              (screenshow pic)
-             ))
+              (screenshow pic)))
 
 ;(implement IP (lambda () "muahahaha")) ; <- impossible to reimplement taxo items
 
@@ -26,14 +25,12 @@
                      5   5    ; x y
                      116 116) ; w h
                ;(eval (display-line "Eval is evil!")) ; TODO check that 'eval gives syntax error
-               (publish pic)
-               )))
+               (publish pic))))
 
 (implement ComposeDisplay
            (lambda (pic ad-str publish)
              (let* ([canvas (make-bitmap 450 450)]
-                    [dc     (new bitmap-dc% [bitmap canvas])]
-                    )
+                    [dc     (new bitmap-dc% [bitmap canvas])])
                (send dc draw-rectangle
                      0   10  ; Top-left at (0, 10), 10 pixels down from top-left
                      350 80) ; width and height 

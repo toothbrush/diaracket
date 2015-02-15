@@ -41,10 +41,8 @@
                             ['define-action     #'taxo]
                             ['define-source     #'taxo]
                             ['define-context    #'rest]
-                            ['define-controller #'rest]
-                            )])
-               (eval #`(remember nm #,where))
-               ) ... )
+                            ['define-controller #'rest])])
+               (eval #`(remember nm #,where))) ... )
            
            (define-syntax (implement sstx)
              (syntax-case sstx []
@@ -54,10 +52,8 @@
                   (unless (ormap (lambda (x) (equal? x (syntax->datum #'name))) 
                                  (append (storage-now rest) (storage-now taxo)))
                     (raise-syntax-error 
-                     (syntax->datum #'name) " is not defined in " #,(mymodname))
-                    )
-                  #'(begin (ins as (... ...)))
-                  )]))
+                     (syntax->datum #'name) " is not defined in " #,(mymodname)))
+                  #'(begin (ins as (... ...))))]))
            
            (provide (all-defined-out)
                     run
@@ -72,8 +68,7 @@
            ; delay evaluation of lookupImplementation till later.
            (define (run)
              (runfw (lambda (x) (lookupImplementation x))
-                    (sysdescription))
-             )
+                    (sysdescription)))
            
            (define-syntax (implementation-module-begin stx2)
              (syntax-case stx2 (implement taxonomy)
@@ -91,10 +86,7 @@
                          taxo (... ...) ; include syntax from taxo-file
                          (implement decls (... ...)) (... ...)
                          )
-                      (raise-syntax-error #f "Please check implementations."))
-                  
-                  )]))
-           ))]))
+                      (raise-syntax-error #f "Please check implementations.")))]))))]))
 
 ;; this macro splices in the taxonomy specification files.
 (define-syntax (specification-module-begin stx)
@@ -110,8 +102,7 @@
        #`(#%module-begin
           (process-spec-body 
            taxo ...
-           (define-keyword nm args ...) ...
-           )))]))
+           (define-keyword nm args ...) ... )))]))
 
 ;; this procedure makes sure that all elements of required appear
 ;; in the list "provided", which should be of the form (listof (implement _name_ ...))
@@ -129,9 +120,8 @@
                    (begin (raise-syntax-error (syntax->datum #'a) 
                                               "implementation unreasonable, uses eval." 
                                               st #'imp)
-                          #f)
-                   )]
-              )) (syntax-e provided))]
+                          #f))]))
+          (syntax-e provided))]
         ; check that all defined components are implemented
         [check2
          (map (lambda (req) 
@@ -140,11 +130,8 @@
                     (begin (raise-syntax-error 
                             req 
                             ": component not implemented! use (implement ... )") 
-                           #f)
-                    )
-                ) required)])
-    (andmap (lambda (x) x) (flatten (list check2 check1)))
-    ))
+                           #f))) required)])
+    (andmap (lambda (x) x) (flatten (list check2 check1)))))
 
 ;; bind the definitions, and add their contracts to a submodule
 ;; so that the implementation-submodules can still access them.
@@ -161,8 +148,7 @@
              (require "structs.rkt")
              (require "useful.rkt")
              (define  contract-id (giveContract obj))
-             (provide contract-id)
-             )))]))
+             (provide contract-id))))]))
 
 
 ; this function basically translates the architect-provided
@@ -209,9 +195,6 @@
                        (current-module-declare-name)
                        (make-resolved-module-path 'diaspec)))))))
 
-
-
-
 ;define-syntax is necessary since we need to introduce identifiers.
 ;; this procedure gets called when a developer uses the (define-{context,..} x ..) macros
 ;; it instantiates the (implement-x ... ) macro, too.
@@ -225,8 +208,7 @@
        #`(begin
            (define-struct/contract structnm
              ([spec   any/c]
-              [implem (giveContract name)]
-              ) #:transparent )
+              [implem (giveContract name)]) #:transparent)
            (provide (struct-out structnm) giveimp)
            (define-syntax (giveimp fstx)
              (syntax-case fstx ()
@@ -247,18 +229,15 @@
                             
                             ; IF DEVICE then provide net access.
                             #,(cond [(equal? 'type 'define-source)
-                                     #'(require net/http-client json)]
-                                    )
+                                     #'(require net/http-client json)])
                             (provide theimp)
                             (define/contract theimp contract-id f))
                           (require #,(datum->syntax fstx `(submod "." ,#'modname)))
                           (setimpl 'name (structnm name theimp))
-                          (display-line "Implementation " 'name " stored.")
-                          )
+                          (display-line "Implementation " 'name " stored."))
                       (raise-syntax-error 'name 
                                           "provided function unreasonable! (uses eval)"
-                                          fstx #'f))
-                  )]))
+                                          fstx #'f)))]))
            (display-line "[" (~a #:min-width 10 (string-upcase (symbol->string 'type)))
                          "] => " "implement " 'name " :: "  (contract-name  (giveContract name)))
            (addDeviceToList name)))]))
