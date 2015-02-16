@@ -15,4 +15,3 @@
 
 (define-controller Display             [when-provided ComposeDisplay 
                                                       do Screen])
-
