@@ -7,11 +7,11 @@
 
 (define-context ProcessPicture Picture [when-provided Button
                                                       get Camera
-                                                      maybe_publish])
+                                                      always_publish])
 
 (define-context ComposeDisplay Picture [when-provided ProcessPicture 
                                                       get MakeAd 
-                                                      always_publish])
+                                                      maybe_publish])
 
 (define-controller Display             [when-provided ComposeDisplay 
                                                       do Screen])

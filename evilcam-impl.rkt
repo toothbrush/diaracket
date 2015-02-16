@@ -14,7 +14,7 @@
 ;(implement IP (lambda () "muahahaha")) ; <- impossible to reimplement taxo items
 
 (implement ProcessPicture ; context
-           (lambda (_button cameraGetPic publish nopublish)
+           (lambda (_button cameraGetPic publish)
              (let* ([pic (cameraGetPic)]
                     [dc  (new bitmap-dc% [bitmap pic])])
                
@@ -28,13 +28,15 @@
                (publish pic))))
 
 (implement ComposeDisplay
-           (lambda (pic ad-str publish)
+           (lambda (pic get-ad-text publish nopublish)
              (let* ([canvas (make-bitmap 450 450)]
+                    [adTxt  (get-ad-text)]
                     [dc     (new bitmap-dc% [bitmap canvas])])
+               (cond [(string=? "" adTxt) (nopublish)])
                (send dc draw-rectangle
                      0   10  ; Top-left at (0, 10), 10 pixels down from top-left
                      350 80) ; width and height 
-               (send dc draw-text (ad-str)
+               (send dc draw-text adTxt
                      10  20)
                (send dc draw-bitmap pic
                      10 100) ; superimpose the bmp
@@ -44,6 +46,8 @@
 
 (implement MakeAd
            (lambda (ip) ; no publish function, because WhenRequired.
-             (~a "showing Ad for IP " (ip))))
+             (let ([txt (ip)])
+               (if (string=? txt "") ""
+                   (~a "showing Ad for IP " txt)))))
 
 ;TODO match up with diaspec in paper: that is, camera is publishing device, no Button.
