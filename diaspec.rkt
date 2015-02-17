@@ -14,8 +14,7 @@
 
 (define-syntax (process-spec-body stx)
   (syntax-case stx ()
-    [(_ 
-      (define-keyword nm args ...) ...)
+    [(_ (define-keyword nm args ...) ...)
      (with-syntax ([run (make-id "run" stx)]
                    [implementation-module-begin (make-id "module-begin-inner" stx)])
        #`(begin
@@ -28,7 +27,7 @@
            (define-something        define-keyword nm args ...) ...
            
            ; pre-empt the contract which checks the description's validity
-           (let ([dummy (sysdescription)]) (display-line "System [specification] seems reasonable."))
+           (let ([dummy (sysdescription)]) (display-line "Specification seems reasonable."))
            
            (require "structs.rkt")
            (require "useful.rkt")
@@ -37,6 +36,7 @@
            (require racket)
            
            (begin-for-syntax
+             ; we have 2 stores for names: taxo and rest.
              (let ([where (match 'define-keyword
                             ['define-action     #'taxo]
                             ['define-source     #'taxo]
@@ -52,11 +52,11 @@
                   (unless (ormap (lambda (x) (equal? x (syntax->datum #'name))) 
                                  (append (storage-now rest) (storage-now taxo)))
                     (raise-syntax-error 
+                     ;; dev called (implement x ..) where x wasn't declared in spec!
                      (syntax->datum #'name) " is not defined in " #,(mymodname)))
                   #'(begin (ins as (... ...))))]))
            
-           (provide (all-defined-out)
-                    run
+           (provide (all-defined-out) run
                     (all-from-out "structs.rkt")
                     (all-from-out "useful.rkt")
                     (all-from-out "fwexec.rkt")
@@ -65,18 +65,19 @@
                     (except-out (all-from-out racket) #%module-begin)
                     (rename-out [implementation-module-begin   #%module-begin]))
            
-           ; delay evaluation of lookupImplementation till later.
-           (define (run)
-             (runfw (lambda (x) (lookupImplementation x))
-                    (sysdescription)))
+           ; delay evaluation of lookupImplementation till later;
+           ; the hashlist isn't populated yet.
+           (define (run) (runfw (lambda (x) (lookupImplementation x)) (sysdescription)))
            
            (define-syntax (implementation-module-begin stx2)
              (syntax-case stx2 (implement taxonomy)
-               [(_ (taxonomy f)
+               [(_ (taxonomy file)
                    (implement decls (... ...)) (... ...))
+                ;; splice in the taxonomy implementations
                 (with-syntax ([(taxo (... ...)) (datum->syntax stx2 (port->syntax
                                                                      (open-input-file 
-                                                                      (syntax->datum #'f)) (list)))])
+                                                                      (syntax->datum #'file)) (list)))])
+                  ;; make sure all declared components are implemented
                   (if (check-presence-of-implementations 
                        (storage-now rest) #'((implement decls (... ...)) (... ...)))
                       
@@ -84,54 +85,49 @@
                          (require "memory.rkt")
                          (emptyHash)
                          taxo (... ...) ; include syntax from taxo-file
-                         (implement decls (... ...)) (... ...)
-                         )
+                         (implement decls (... ...)) (... ...))
                       (raise-syntax-error #f "Please check implementations.")))]))))]))
 
 ;; this macro splices in the taxonomy specification files.
 (define-syntax (specification-module-begin stx)
   (syntax-case stx (taxonomy)
-    [(_ 
-      (taxonomy f)
-      (define-keyword nm args ...) ...)
-     (with-syntax ([run (make-id "run" stx)]
-                   [module-begin-inner (make-id "module-begin-inner" stx)]
+    [(_ (taxonomy file)
+        (define-keyword nm args ...) ...)
+     (with-syntax ([module-begin-inner (make-id "module-begin-inner" stx)]
                    [(taxo ...) (datum->syntax stx (port->syntax
                                                    (open-input-file 
-                                                    (syntax->datum #'f)) (list)))])
+                                                    (syntax->datum #'file)) (list)))])
        #`(#%module-begin
-          (process-spec-body 
-           taxo ...
-           (define-keyword nm args ...) ... )))]))
+          (process-spec-body taxo ...
+                             (define-keyword nm args ...) ... )))]))
 
 ;; this procedure makes sure that all elements of required appear
 ;; in the list "provided", which should be of the form (listof (implement _name_ ...))
 (define-for-syntax (check-presence-of-implementations required provided)
   (define provided-names '())
-  ; check that all functions are eval-free
-  (let ([check1 
-         (map
-          (lambda (st)
-            (syntax-case st ()
-              [(_ a imp) 
-               (if (isreasonable #'a #'imp)
-                   (begin (set! provided-names (cons (syntax->datum #'a) provided-names))
-                          #t)
-                   (begin (raise-syntax-error (syntax->datum #'a) 
-                                              "implementation unreasonable, uses eval." 
-                                              st #'imp)
-                          #f))]))
-          (syntax-e provided))]
-        ; check that all defined components are implemented
-        [check2
-         (map (lambda (req) 
-                (if (ormap (lambda (candidate) (equal? candidate req)) provided-names)
-                    #t
-                    (begin (raise-syntax-error 
-                            req 
-                            ": component not implemented! use (implement ... )") 
-                           #f))) required)])
-    (andmap (lambda (x) x) (flatten (list check2 check1)))))
+  (let 
+      ; check that all functions are eval-free
+      ([check1 (map (lambda (st)
+                      (syntax-case st ()
+                        [(_ a imp) 
+                         (if (isreasonable #'a #'imp)
+                             (begin (set! provided-names (cons (syntax->datum #'a) provided-names))
+                                    #t)
+                             (begin (raise-syntax-error (syntax->datum #'a) 
+                                                        "implementation unreasonable, uses eval." 
+                                                        st #'imp)
+                                    #f))]))
+                    (syntax-e provided))]
+       ; check that all declared components are given implementations
+       [check2 (map (lambda (req) 
+                      (if (ormap (lambda (candidate) (equal? candidate req)) provided-names)
+                          #t
+                          (begin (raise-syntax-error 
+                                  req 
+                                  ": component not implemented! use (implement ... )") 
+                                 #f))) 
+                    required)])
+    (and check2 check1)))
 
 ;; bind the definitions, and add their contracts to a submodule
 ;; so that the implementation-submodules can still access them.
@@ -170,16 +166,13 @@
                                      (interactioncontract 
                                       nm             (quoteDr dr) (quotePub pub)) (quoteTy ty))))]
     [(_ define-source name ty)
-     #`(begin
-         (contracts-module+ name (source 'name (quoteTy ty))))]
+     #`(begin (contracts-module+ name (source 'name (quoteTy ty))))]
     [(_ define-action name ty)
-     #`(begin 
-         (contracts-module+ name (action 'name (quoteTy ty))))]
+     #`(begin (contracts-module+ name (action 'name (quoteTy ty))))]
     [(_ define-controller name [when-provided nm do act])
-     #`(begin
-         (contracts-module+ name (controller 'name 
-                                             (interactioncontract 
-                                              nm           'none           act))))]))
+     #`(begin (contracts-module+ name (controller 'name 
+                                                  (interactioncontract 
+                                                   nm           'none           act))))]))
 
 ; brr ugly, find module name.
 ; used to give nicer error messages, and to include submodules
@@ -227,7 +220,7 @@
                             (require "structs.rkt" (for-syntax "structs.rkt"))
                             (require rs2)
                             
-                            ; IF DEVICE then provide net access.
+                            ; IF it's a DEVICE then provide http access.
                             #,(cond [(equal? 'type 'define-source)
                                      #'(require net/http-client json)])
                             (provide theimp)
@@ -236,7 +229,7 @@
                           (setimpl 'name (structnm name theimp))
                           (display-line "Implementation " 'name " stored."))
                       (raise-syntax-error 'name 
-                                          "provided function unreasonable! (uses eval)"
+                                          "provided function unreasonable! (== uses eval)"
                                           fstx #'f)))]))
            (display-line "[" (~a #:min-width 10 (string-upcase (symbol->string 'type)))
                          "] => " "implement " 'name " :: "  (contract-name  (giveContract name)))
