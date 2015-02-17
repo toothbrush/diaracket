@@ -162,7 +162,7 @@
 
 ; Stateful list of defined devices.
 (define specifiedDevices (list))
-(define (addDeviceToList d)
+(define (addComponentToList d)
   (set! specifiedDevices (cons d specifiedDevices)))
 (define (clearList) 
   (set! specifiedDevices (list)))

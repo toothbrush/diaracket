@@ -59,7 +59,8 @@
     [(_ String ) #''str]
     [(_ Picture) #''pic]))
 
-;; gets the implementation term
+;; gets the implementation term, which is always 
+;; the 2nd (and last) element of the struct
 (define (lookupImplementation needle)
   (let ([str (hash-ref implementationsHash needle)])
     (vector-ref (struct->vector str) 2)))
@@ -73,7 +74,6 @@
      #`(begin
          (let* ([f (last (syntax->datum x))]
                 [words (flatten f)]
-                [evilwords (filter (lambda (xxx)
-                                     (equal? 'eval xxx))
+                [evilwords (filter (lambda (xxx) (equal? 'eval xxx))
                                    words)])
            (empty? evilwords)))]))

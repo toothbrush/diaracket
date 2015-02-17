@@ -200,7 +200,7 @@
           [contract-id (make-id "~a-contract"  stx #'name)])
        #`(begin
            (define-struct/contract structnm
-             ([spec   any/c]
+             ([spec   (or/c context? controller? source? action?)]
               [implem (giveContract name)]) #:transparent)
            (provide (struct-out structnm) giveimp)
            (define-syntax (giveimp fstx)
@@ -209,18 +209,16 @@
                 (with-syntax 
                     ([modname   (make-id "~a-submodule" fstx #'name)]
                      [theimp    (make-id "~a-implementation" fstx #'name)]
-                     [rs2 (datum->syntax
-                           fstx
-                           `(submod #,(mymodname) contracts))])
+                     [rs2 (datum->syntax fstx `(submod #,(mymodname) contracts))])
                   ; here we'll inspect the given implementation for evilness.
                   (if (isreasonable #'theimp #'f)
                       #`(begin
                           (module modname racket/gui
                             (require "useful.rkt")
                             (require "structs.rkt" (for-syntax "structs.rkt"))
-                            (require rs2)
+                            (require rs2) ; import the contracts-collection submodule
                             
-                            ; IF it's a DEVICE then provide http access.
+                            ; if it's a SOURCE then provide http access.
                             #,(cond [(equal? 'type 'define-source)
                                      #'(require net/http-client json)])
                             (provide theimp)
@@ -233,4 +231,4 @@
                                           fstx #'f)))]))
            (display-line "[" (~a #:min-width 10 (string-upcase (symbol->string 'type)))
                          "] => " "implement " 'name " :: "  (contract-name  (giveContract name)))
-           (addDeviceToList name)))]))
+           (addComponentToList name)))]))

@@ -19,9 +19,10 @@
   
   ; eventually these will be inserted, as syntax, into
   ; the generated modules.
-  (define (add-rest! x) (set! storage (cons x storage)))
+  (define (add-rest! x) (set! storage      (cons x storage)))
   (define (add-taxo! x) (set! storage-taxo (cons x storage-taxo))))
 
+; retrieve the store
 (define-syntax (storage-now stx)
   (syntax-case stx (storage-now rest taxo)
     [(storage-now rest)
@@ -31,18 +32,15 @@
      (with-syntax ([syms storage-taxo])
        #'(quote syms))]))
 
+; add to the store
 (define-syntax (remember stx)
+  ; pattern-match on which list to store to
   (syntax-case stx (remember rest taxo)
-    [(remember sym rest)
-     #'(begin (define-syntax _ (add-rest! (quote sym))))]
-    [(remember sym taxo)
-     #'(begin (define-syntax _ (add-taxo! (quote sym))))]))
+    [(remember sym rest)  #'(begin (define-syntax _ (add-rest! (quote sym))))]
+    [(remember sym taxo)  #'(begin (define-syntax _ (add-taxo! (quote sym))))]))
 
-(define implementationsHash
-  (make-hash))
-(define (setimpl k v) 
-  (hash-set! implementationsHash k v))
-(define (emptyHash)   
-  (hash-map  implementationsHash 
-             (lambda (k v) (hash-remove! implementationsHash k)))
+(define implementationsHash (make-hash))
+(define (setimpl k v)  (hash-set! implementationsHash k v))
+(define (emptyHash)    (hash-map  implementationsHash 
+                                  (lambda (k v) (hash-remove! implementationsHash k)))
   (void))
