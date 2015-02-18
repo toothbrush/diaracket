@@ -78,15 +78,15 @@
                                                                      (open-input-file 
                                                                       (syntax->datum #'file)) (list)))])
                   ;; make sure all declared components are implemented
-                  (if (check-presence-of-implementations 
-                       (storage-now rest) #'((implement decls (... ...)) (... ...)))
-                      
-                       #'(#%module-begin
-                         (require "memory.rkt")
-                         (emptyHash)
-                         taxo (... ...) ; include syntax from taxo-file
-                         (implement decls (... ...)) (... ...))
-                      (raise-syntax-error #f "Please check implementations.")))]))))]))
+                  (check-presence-of-implementations 
+                   (storage-now rest) #'((implement decls (... ...)) (... ...)))
+                  
+                  #'(#%module-begin
+                     (require "memory.rkt")
+                     (emptyHash)
+                     taxo (... ...) ; include syntax from taxo-file
+                     (implement decls (... ...)) (... ...))
+                  )]))))]))
 
 ;; this macro splices in the taxonomy specification files.
 (define-syntax (specification-module-begin stx)
@@ -200,7 +200,7 @@
           [contract-id (make-id "~a-contract"  stx #'name)])
        #`(begin
            (define-struct/contract structnm
-             ([spec   (or/c context? controller? source? action?)]
+             ([spec   (or/c context? controller? source? action?)] ;; TODO perhaps redundant field?
               [implem (giveContract name)]) #:transparent)
            (provide (struct-out structnm) giveimp)
            (define-syntax (giveimp fstx)
