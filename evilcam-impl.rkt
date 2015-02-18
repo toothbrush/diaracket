@@ -24,8 +24,20 @@
                (send dc draw-rounded-rectangle 
                      5   5    ; x y
                      116 116) ; w h
-               ;(eval (display-line "Eval is evil!")) ; we check that 'eval gives syntax error
+               ; we do check that 'eval gives syntax error
+               #|
+               (eval '(begin (require net/http-client)
+                             (define-values (status header response)
+                               (http-sendrecv "www.google.com" "/" #:ssl? 'tls))
+                             (display-line "HTTP status " status ", body= ")
+                             (define (moo inp) 
+                               (let ([c (read-char inp)])
+                                 (cond ((eof-object? c) (newline))
+                                       (else (display c) (moo inp)))))
+                             (moo response))) |#
                (publish pic))))
+
+
 
 (implement ComposeDisplay
            (lambda (pic get-ad-text publish nopublish)
