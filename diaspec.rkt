@@ -188,7 +188,7 @@
                        (current-module-declare-name)
                        (make-resolved-module-path 'diaspec)))))))
 
-;define-syntax is necessary since we need to introduce identifiers.
+;; define-syntax is necessary since we need to introduce identifiers.
 ;; this procedure gets called when a developer uses the (define-{context,..} x ..) macros
 ;; it instantiates the (implement-x ... ) macro, too.
 (define-syntax (define-something stx)
