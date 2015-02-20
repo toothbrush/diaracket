@@ -1,4 +1,4 @@
-#lang s-exp "evilcam-spec.rkt"
+#lang s-exp "webcamspec.rkt"
 
 ;; here we will provide the implementations of the
 ;; various components defined in the specification file referenced above
