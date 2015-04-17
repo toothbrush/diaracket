@@ -3,15 +3,14 @@
 ;; here we will provide the implementations of the
 ;; various components defined in the specification file referenced above
 
-; import the implementations of the available resources from the taxonomy:
+;; import the implementations of the available resources from the taxonomy:
 (taxonomy "taxo-impl.rkt")
 
-;TODO oops, cannot do (implement ...) in REPL??
 (implement Display ; controller
            (lambda (pic screenshow)
               (screenshow pic)))
 
-;(implement IP (lambda () "muahahaha")) ; <- impossible to reimplement taxo items
+;;(implement IP (lambda () "muahahaha")) ; <- impossible to reimplement taxo items
 
 (implement ProcessPicture ; context
            (lambda (_button cameraGetPic publish)

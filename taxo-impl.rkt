@@ -22,10 +22,11 @@
 
 (implement IP
            (lambda ()
-             (define-values (status header response)
-               (http-sendrecv "httpbin.org" "/ip" #:ssl? 'tls))
-             (let ([js (read-json response)])
-               (hash-ref js 'origin "oops")))) ;; return some value from the web
+             (with-handlers ([exn:fail? (lambda (exn) (~a "// HTTP airbag! " exn))])
+               (define-values (status header response)
+                 (http-sendrecv "httpbin.org" "/ip" #:ssl? 'tls))
+               (let ([js (read-json response)])
+                 (hash-ref js 'origin "oops"))))) ;; return some value from the web
 
 (implement Geo
            (lambda ()
