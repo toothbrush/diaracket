@@ -23,19 +23,7 @@
                (send dc draw-rounded-rectangle 
                      5   5    ; x y
                      116 116) ; w h
-               ; we do check that 'eval gives syntax error
-               #|
-               (eval '(begin (require net/http-client)
-                             (define-values (status header response)
-                               (http-sendrecv "www.google.com" "/" #:ssl? 'tls))
-                             (display-line "HTTP status " status ", body= ")
-                             (define (moo inp) 
-                               (let ([c (read-char inp)])
-                                 (cond ((eof-object? c) (newline))
-                                       (else (display c) (moo inp)))))
-                             (moo response))) |#
                (publish pic))))
-
 
 
 (implement ComposeDisplay
@@ -53,12 +41,13 @@
                      10 100) ; superimpose the bmp
                (publish canvas))))
 
-; let's have some ads as well. wonderful ads.
+; let's have some ads as well. 
 
 (implement MakeAd
-           (lambda (ip) ; no publish function, because WhenRequired.
+           (lambda (ip)   ; no publish function, because WhenRequired.
              (let ([txt (ip)])
                (if (string=? txt "") ""
                    (~a "showing Ad for IP " txt)))))
 
-;TODO match up with diaspec in paper: that is, camera is publishing device, no Button.
+;;TODO match up with diaspec in paper: that is, camera is publishing
+;;device, no Button.
