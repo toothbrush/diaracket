@@ -41,9 +41,9 @@
     [(_ v)       #'v]))
 
 (define-syntax (quotePub stx)
-  (syntax-case stx (always_publish maybe_publish)
-    [(_ always_publish) #''alwaysPublish]
-    [(_ maybe_publish)  #''maybePublish]))
+  (syntax-case stx (always-publish maybe-publish)
+    [(_ always-publish) #''alwaysPublish]
+    [(_ maybe-publish)  #''maybePublish]))
 
 ;; used for splicing a file into another, as syntax
 (define (port->syntax p acc)

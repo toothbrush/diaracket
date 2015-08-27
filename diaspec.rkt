@@ -151,25 +151,25 @@
 ; declarations into the corresponding structs, then uses 
 ; contracts-module+ to bind them to predictable names. 
 (define-syntax (append-contracts-module stx)
-  (syntax-case stx (define-context define-controller define-source define-action do 
-                     when-required when-provided get)
-    [(_ define-context name ty [when-required get dr])
+  (syntax-case stx (define-context as define-controller define-source define-action do 
+                     when required provided get nothing)
+    [(_ define-context name as ty [when required (get dr)])
      #`(begin
          (contracts-module+ name 
                             (context 'name 
                                      (interactioncontract 
                                       'when-required (quoteDr dr) 'neverPublish) (quoteTy ty))))]
-    [(_ define-context name ty [when-provided nm get dr pub])
+    [(_ define-context name as ty [when provided nm (get dr) pub])
      #`(begin
          (contracts-module+ name 
                             (context 'name 
                                      (interactioncontract 
                                       nm             (quoteDr dr) (quotePub pub)) (quoteTy ty))))]
-    [(_ define-source name ty)
+    [(_ define-source name as ty)
      #`(begin (contracts-module+ name (source 'name (quoteTy ty))))]
-    [(_ define-action name ty)
+    [(_ define-action name as ty)
      #`(begin (contracts-module+ name (action 'name (quoteTy ty))))]
-    [(_ define-controller name [when-provided nm do act])
+    [(_ define-controller name [when provided nm do act])
      #`(begin (contracts-module+ name (controller 'name 
                                                   (interactioncontract 
                                                    nm           'none           act))))]))

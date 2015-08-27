@@ -6,10 +6,10 @@
 ;; note for the meantime that this file isn't independently loadable --
 ;; it is syntactically spliced into the top of the specification file.
 
-(define-action Screen Picture)
+(define-action Screen as Picture)
 
-(define-source Camera Picture)
-(define-source Button Boolean)
+(define-source Camera as Picture)
+(define-source Button as Boolean)
 
-(define-source IP String)
-(define-source Geo String)
+(define-source IP     as String)
+(define-source Geo    as String)
