@@ -26,7 +26,7 @@
            ;; copy the architect's declarations
            (define-something        define-keyword nm args ...) ...
            
-           ; pre-empt the contract which checks the description's validity
+           ;; pre-empt the contract which checks the description's validity
            (let ([dummy (sysdescription)]) (display-line "Specification seems reasonable."))
            
            (require "structs.rkt")
@@ -36,7 +36,7 @@
            (require racket)
            
            (begin-for-syntax
-             ; we have 2 stores for names: taxo and rest.
+             ;; we have 2 stores for names: taxo and rest.
              (let ([where (match 'define-keyword
                             ['define-action     #'taxo]
                             ['define-source     #'taxo]
@@ -48,7 +48,7 @@
              (syntax-case sstx []
                [(_ name as (... ...))
                 (with-syntax 
-                    ([ins (make-id "implement-~a" sstx  #'name)])
+                  ([ins (make-id "implement-~a" sstx  #'name)])
                   (unless (ormap (lambda (x) (equal? x (syntax->datum #'name))) 
                                  (append (storage-now rest) (storage-now taxo)))
                     (raise-syntax-error 
@@ -65,8 +65,8 @@
                     (except-out (all-from-out racket) #%module-begin)
                     (rename-out [implementation-module-begin   #%module-begin]))
            
-           ; delay evaluation of lookupImplementation till later;
-           ; the hashlist isn't populated yet.
+           ;; delay evaluation of lookupImplementation till later;
+           ;; the hashlist isn't populated yet.
            (define (run) (runfw (lambda (x) (lookupImplementation x)) (sysdescription)))
            
            (define-syntax (implementation-module-begin stx2)
@@ -74,9 +74,10 @@
                [(_ (taxonomy file)
                    (implement decls (... ...)) (... ...))
                 ;; splice in the taxonomy implementations
-                (with-syntax ([(taxo (... ...)) (datum->syntax stx2 (port->syntax
-                                                                     (open-input-file 
-                                                                      (syntax->datum #'file)) (list)))])
+                (with-syntax ([(taxo (... ...))
+                               (datum->syntax stx2 (port->syntax
+                                                    (open-input-file 
+                                                     (syntax->datum #'file)) (list)))])
                   ;; make sure all declared components are implemented
                   (check-presence-of-implementations 
                    (storage-now rest) #'((implement decls (... ...)) (... ...)))
@@ -84,7 +85,7 @@
                   #'(#%module-begin
                      (require "memory.rkt")
                      (emptyHash)
-                     taxo (... ...) ; include syntax from taxo-file
+                     taxo (... ...)    ; include syntax from taxo-file
                      (implement decls (... ...)) (... ...))
                   )]))))]))
 
@@ -106,7 +107,7 @@
 (define-for-syntax (check-presence-of-implementations required provided)
   (define provided-names '())
   (let 
-      ; check that all functions are eval-free
+      ;; check that all functions are eval-free
       ([check1 (map (lambda (st)
                       (syntax-case st ()
                         [(_ a imp) 
@@ -118,7 +119,7 @@
                                                         st #'imp)
                                     #f))]))
                     (syntax-e provided))]
-       ; check that all declared components are given implementations
+       ;; check that all declared components are given implementations
        [check2 (map (lambda (req) 
                       (if (ormap (lambda (candidate) (equal? candidate req)) provided-names)
                           #t
@@ -147,9 +148,9 @@
              (provide contract-id))))]))
 
 
-; this function basically translates the architect-provided
-; declarations into the corresponding structs, then uses 
-; contracts-module+ to bind them to predictable names. 
+;; this function basically translates the architect-provided
+;; declarations into the corresponding structs, then uses 
+;; contracts-module+ to bind them to predictable names. 
 (define-syntax (append-contracts-module stx)
   (syntax-case stx (define-context as define-controller define-source define-action do 
                      when required provided get nothing)
@@ -174,8 +175,8 @@
                                                   (interactioncontract 
                                                    nm           'none           act))))]))
 
-; brr ugly, find module name.
-; used to give nicer error messages, and to include submodules
+;; brr ugly, find module name.
+;; used to give nicer error messages, and to include submodules
 (define-for-syntax (mymodname) 
   (last
    (regexp-split #rx"/"
