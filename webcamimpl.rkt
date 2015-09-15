@@ -41,7 +41,7 @@
                      10 100) ; superimpose the bmp
                (publish canvas))))
 
-; let's have some ads as well. 
+;; let's have some ads as well. 
 
 (implement MakeAd
            (lambda (ip)   ; no publish function, because WhenRequired.
