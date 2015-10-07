@@ -1,0 +1,79 @@
+#lang racket
+
+(require racket/draw)
+(provide (all-defined-out))
+(provide (for-syntax (all-defined-out)))
+(require "memory.rkt")
+
+;; helper functions
+(define (display-line . args)
+  (for-each display args)
+  (newline))
+
+(define (type? t)
+  (match t
+    ['int  #t]
+    ['bool #t]
+    ['str  #t]
+    ['pic  #t]
+    [else  (error "not a type! " t)]))
+
+(define-syntax-rule (interp ty)
+  (match ty
+    ['int  number?]
+    ['bool boolean?]
+    ['str  string?]
+    ['pic  (is-a?/c bitmap%)]
+    ['void void?]
+    [else (error "nonsense type! " ty)]))
+
+(define make-id
+  (case-lambda
+    [(template stx id)
+     (let ([str (format template (syntax->datum id))])
+       (datum->syntax stx (string->symbol str)))]
+    [(template stx)
+     (datum->syntax stx (string->symbol template))]))
+
+(define-syntax (quoteDr stx)
+  (syntax-case stx (nothing)
+    [(_ nothing) #''none]
+    [(_ v)       #'v]))
+
+(define-syntax (quotePub stx)
+  (syntax-case stx (always-publish maybe-publish)
+    [(_ always-publish) #''alwaysPublish]
+    [(_ maybe-publish)  #''maybePublish]))
+
+;; used for splicing a file into another, as syntax
+(define (port->syntax p acc)
+  (let* ([v (read p)])
+    (cond
+      [(eof-object? v)  acc]
+      [else             (port->syntax p (append acc (list v)))])))
+
+(define-syntax (quoteTy stx)
+  (syntax-case stx (Boolean Integer Picture String)
+    [(_ Boolean) #''bool]
+    [(_ Integer) #''int]
+    [(_ String ) #''str]
+    [(_ Picture) #''pic]))
+
+;; gets the implementation term, which is always 
+;; the 2nd (and last) element of the struct
+(define (lookupImplementation needle)
+  (let ([str (hash-ref implementationsHash needle)])
+    (vector-ref (struct->vector str) 2)))
+
+;; here we check that no taboo-words are present
+;; for the moment only (eval ..) is taboo, but one could
+;; easily expand this list.
+(define-syntax (isreasonable stx)
+  (syntax-case stx (isreasonable)
+    [(isreasonable nm x)
+     #`(begin
+         (let* ([f (last (syntax->datum x))]
+                [words (flatten f)]
+                [evilwords (filter (lambda (xxx) (equal? 'eval xxx))
+                                   words)])
+           (empty? evilwords)))]))
