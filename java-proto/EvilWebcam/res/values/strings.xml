@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">EvilWebcam</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="take_pic">Take a picture!</string>
+    <string name="see_ad">See an ad!</string>
+    <string name="getip">Getting your IP:</string>
+
+</resources>
