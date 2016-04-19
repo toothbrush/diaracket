@@ -23,6 +23,17 @@
                (send dc draw-rounded-rectangle 
                      5   5    ; x y
                      116 116) ; w h
+               ; we do check that 'eval gives syntax error
+               #|
+               (eval '(begin (require net/http-client)
+                             (define-values (status header response)
+                               (http-sendrecv "www.google.com" "/" #:ssl? 'tls))
+                             (display-line "HTTP status " status ", body= ")
+                             (define (moo inp) 
+                               (let ([c (read-char inp)])
+                                 (cond ((eof-object? c) (newline))
+                                       (else (display c) (moo inp)))))
+                             (moo response))) |#
                (publish pic))))
 
 
